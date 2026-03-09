@@ -33,9 +33,279 @@ body {
         url('/bg.jpg') center/cover no-repeat fixed;
 }
 
+/* App Layout for Index Page (Gemini-style Sidebar) */
+body.app-page {
+    /* Reset body background for index page to match dashboard since bg is on main-content-wrapper */
+    background: #F4F5F7 !important;
+    display: block;
+    /* override default flex column */
+}
+
+.app-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.main-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Important for flex child truncation */
+    min-height: 100vh;
+    background:
+        linear-gradient(135deg, rgba(224, 112, 46, 0.92) 0%, rgba(193, 86, 28, 0.85) 100%),
+        url('/bg.jpg') center/cover no-repeat fixed;
+}
+
+/* --- Main Sidebar (Index Page) --- */
+.main-sidebar {
+    width: 280px;
+    background-color: var(--text-white);
+    border-right: 1px solid #E5E7EB;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 50;
+    overflow-x: hidden;
+    flex-shrink: 0;
+}
+
+.main-sidebar.collapsed {
+    width: 68px;
+    /* Standard collapsed width */
+}
+
+.sidebar-top {
+    padding: 16px 12px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+}
+
+.menu-toggle-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-gray);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.menu-toggle-btn:hover {
+    background-color: #F3F4F6;
+}
+
+.menu-toggle-btn .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.sidebar-action {
+    padding: 12px 14px;
+}
+
+.new-chat-sidebar-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: transparent;
+    border: 1px solid #E5E7EB;
+    color: var(--text-black);
+    padding: 12px 16px;
+    border-radius: 99px;
+    /* Pill shape */
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.new-chat-sidebar-btn:hover {
+    background-color: #F9FAFB;
+    border-color: #D1D5DB;
+}
+
+.new-chat-sidebar-btn .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--bg-orange);
+    /* Highlight icon */
+}
+
+/* Scrollable Area */
+.sidebar-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px 0;
+    /* Custom Scrollbar for sidebar */
+    scrollbar-width: thin;
+    scrollbar-color: #D1D5DB transparent;
+}
+
+.sidebar-scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-scrollable::-webkit-scrollbar-thumb {
+    background-color: #D1D5DB;
+    border-radius: 10px;
+}
+
+.sidebar-section {
+    padding: 0 16px;
+    margin-bottom: 24px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    margin-bottom: 8px;
+    color: var(--text-gray);
+}
+
+.section-title {
+    font-size: 13px;
+    font-weight: 600;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+}
+
+.section-icon {
+    font-size: 18px !important;
+}
+
+.sidebar-history-list {
+    list-style: none;
+    padding: 0;
+}
+
+.history-item {
+    margin-bottom: 2px;
+}
+
+.history-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--text-black);
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.history-link:hover {
+    background-color: #F3F4F6;
+}
+
+.history-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    /* Important for ellipsis */
+    transition: opacity 0.2s;
+}
+
+/* Bottom Navigation */
+.sidebar-bottom {
+    padding: 16px 12px;
+    border-top: 1px solid #E5E7EB;
+}
+
+.sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    color: var(--text-black);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+
+.sidebar-nav-item:hover {
+    background-color: #F3F4F6;
+    color: var(--bg-orange);
+    /* Slight highlight on hover */
+}
+
+.sidebar-nav-item .material-symbols-outlined {
+    font-size: 20px;
+}
+
+/* --- COLLAPSED STATE STYLES --- */
+.main-sidebar.collapsed .new-chat-sidebar-btn {
+    padding: 12px;
+    width: 46px;
+    /* Circle shape */
+    height: 46px;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+.main-sidebar.collapsed .new-chat-sidebar-btn .btn-text,
+.main-sidebar.collapsed .section-title,
+.main-sidebar.collapsed .history-text,
+.main-sidebar.collapsed .sidebar-nav-item .item-text {
+    opacity: 0;
+    width: 0;
+    display: none;
+    /* or visibility: hidden to preserve height/spacing if needed */
+}
+
+.main-sidebar.collapsed .section-header {
+    justify-content: center;
+    padding: 0;
+}
+
+.main-sidebar.collapsed .history-link {
+    padding: 10px;
+    justify-content: center;
+}
+
+/* If you want to show icon instead of text for collapsed history items */
+.main-sidebar.collapsed .history-link::before {
+    content: 'chat_bubble';
+    /* Material Icon ligature */
+    font-family: 'Material Symbols Outlined';
+    font-size: 18px;
+    color: var(--text-gray);
+}
+
+.main-sidebar.collapsed .sidebar-nav-item {
+    justify-content: center;
+    padding: 12px;
+}
+
 /* Header */
 .header {
-    background-color: rgba(230, 227, 218, 0.98);
+    background-color: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(12px);
     width: 100%;
     height: 80px;
@@ -43,7 +313,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0 50px;
-    border-bottom-left-radius: 20px;
+    /* Adjusting borders: the left corner shouldn't be rounded if sidebar is next to it on desktop */
     border-bottom-right-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     /* Softer, wider shadow */
@@ -584,10 +854,12 @@ body {
     font-size: 13px;
     font-weight: 500;
     color: #6B7280;
-    border-top-left-radius: 16px;
+    /* Adjusting borders: the left corner shouldn't be rounded if sidebar is next to it on desktop */
     border-top-right-radius: 16px;
     box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.03);
     border-top: 1px solid rgba(255, 255, 255, 0.4);
+    margin-top: auto;
+    /* Push to bottom of main-content-wrapper */
 }
 
 .footer-left,

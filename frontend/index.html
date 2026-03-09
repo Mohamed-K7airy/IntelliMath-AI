@@ -19,132 +19,220 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-    <header class="header">
-        <div class="logo-container">
-            <img src="logo.png" alt="Sphinx-SCA Logo" class="logo-icon">
-            <div class="logo-text">
-                <span class="logo-sphinx">Sphinx</span><span class="logo-sca">-SCA</span><span
-                    style="font-size: 14px; font-weight: 800; color: var(--bg-orange); margin-left: 6px; vertical-align: middle;">BETA</span>
-            </div>
-        </div>
-
-        <button class="mobile-menu-btn" id="mobile-menu-btn">
-            <span class="material-symbols-outlined">menu</span>
-        </button>
-        <nav class="nav">
-            <a href="index.html" class="nav-link">Home</a>
-            <a href="dashboard.html" class="nav-link">Dashboard</a>
-            <a href="login.html" class="nav-link" id="nav-login-btn">log in</a>
-
-            <div class="profile-container" id="nav-profile-container">
-                <div class="nav-profile" id="nav-user-avatar" title="Your Account"></div>
-                <div class="profile-dropdown">
-                    <a href="dashboard.html" class="dropdown-item">
-                        <span class="material-symbols-outlined">person</span>
-                        Profile
-                    </a>
-                    <a href="#" class="dropdown-item">
-                        <span class="material-symbols-outlined">settings</span>
-                        Settings
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item logout" id="logout-btn">
-                        <span class="material-symbols-outlined">logout</span>
-                        Log Out
-                    </a>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <main class="hero">
-        <div class="hero-content">
-            <div class="hero-avatar-container">
-                <img src="logo.png" alt="Sphinx-SCA AI" class="hero-avatar">
-            </div>
-            <h1 class="hero-title">WELCOME</h1>
-
-            <div class="pharaonic-line">
-                <div class="diamond"></div>
-                <div class="line"></div>
-                <div class="diamond center"></div>
-                <div class="line"></div>
-                <div class="diamond"></div>
+<body class="app-page">
+    <div class="app-layout">
+        <!-- Main Sidebar -->
+        <aside class="main-sidebar collapsed" id="main-sidebar">
+            <div class="sidebar-top">
+                <button class="menu-toggle-btn" id="sidebar-toggle-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
             </div>
 
-            <p class="hero-subtitle">Math Solver &amp; AI Assistant</p>
+            <div class="sidebar-action">
+                <button class="new-chat-sidebar-btn" onclick="window.location.reload();">
+                    <span class="material-symbols-outlined">add</span>
+                    <span class="btn-text">New chat</span>
+                </button>
+            </div>
 
-            <div class="search-container">
-                <textarea class="search-input" placeholder="Ask me anything about math...." rows="1"></textarea>
-                <div class="search-footer">
-                    <div class="search-tools">
-                        <button class="icon-button mic-btn" title="Voice Input">
-                            <span class="material-symbols-outlined">mic</span>
-                        </button>
-                        <button class="icon-button upload-btn" title="Upload Image">
-                            <span class="material-symbols-outlined">image</span>
-                        </button>
+            <div class="sidebar-scrollable">
+                <div class="sidebar-section hover-expand">
+                    <div class="section-header">
+                        <span class="material-symbols-outlined section-icon">history</span>
+                        <span class="section-title">Recent</span>
                     </div>
-                    <button class="send-btn" title="Send Request">
-                        <span class="material-symbols-outlined send-icon">arrow_upward</span>
-                    </button>
+                    <ul class="sidebar-history-list" id="sidebar-history-list">
+                        <!-- History items populated via JS -->
+                    </ul>
                 </div>
             </div>
-        </div>
-    </main>
 
-    <!-- Chat Interface (Hidden by default) -->
-    <main class="chat-interface" id="chat-interface" style="display: none;">
-        <div class="chat-messages" id="chat-messages">
-            <!-- Messages will be appended here -->
-        </div>
+            <div class="sidebar-bottom">
+                <a href="dashboard.html" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="item-text">Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="item-text">Settings</span>
+                </a>
+            </div>
+        </aside>
 
-        <div class="chat-input-wrapper">
-            <div class="search-container chat-mode">
-                <textarea class="search-input" id="chat-input" placeholder="Ask me anything about math...."
-                    rows="1"></textarea>
-                <div class="search-footer">
-                    <div class="search-tools">
-                        <button class="icon-button mic-btn" title="Voice Input">
-                            <span class="material-symbols-outlined">mic</span>
-                        </button>
-                        <button class="icon-button upload-btn" title="Upload Image">
-                            <span class="material-symbols-outlined">image</span>
-                        </button>
+        <!-- Main Content Area -->
+        <div class="main-content-wrapper">
+            <header class="header">
+                <div class="logo-container">
+                    <img src="logo.png" alt="Sphinx-SCA Logo" class="logo-icon">
+                    <div class="logo-text">
+                        <span class="logo-sphinx">Sphinx</span><span class="logo-sca">-SCA</span><span
+                            style="font-size: 14px; font-weight: 800; color: var(--bg-orange); margin-left: 6px; vertical-align: middle;">BETA</span>
                     </div>
-                    <button class="send-btn" id="chat-send-btn" title="Send Request">
-                        <span class="material-symbols-outlined send-icon">arrow_upward</span>
-                    </button>
+                </div>
+
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="dashboard.html" class="nav-link">Dashboard</a>
+                    <a href="login.html" class="nav-link" id="nav-login-btn">log in</a>
+
+                    <div class="profile-container" id="nav-profile-container">
+                        <div class="nav-profile" id="nav-user-avatar" title="Your Account"></div>
+                        <div class="profile-dropdown">
+                            <a href="dashboard.html" class="dropdown-item">
+                                <span class="material-symbols-outlined">person</span>
+                                Profile
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <span class="material-symbols-outlined">settings</span>
+                                Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item logout" id="logout-btn">
+                                <span class="material-symbols-outlined">logout</span>
+                                Log Out
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+            </header>
+
+            <main class="hero">
+                <div class="hero-content">
+                    <div class="hero-avatar-container">
+                        <img src="logo.png" alt="Sphinx-SCA AI" class="hero-avatar">
+                    </div>
+                    <h1 class="hero-title">WELCOME</h1>
+
+                    <div class="pharaonic-line">
+                        <div class="diamond"></div>
+                        <div class="line"></div>
+                        <div class="diamond center"></div>
+                        <div class="line"></div>
+                        <div class="diamond"></div>
+                    </div>
+
+                    <p class="hero-subtitle">Math Solver &amp; AI Assistant</p>
+
+                    <div class="search-container">
+                        <textarea class="search-input" placeholder="Ask me anything about math...." rows="1"></textarea>
+                        <div class="search-footer">
+                            <div class="search-tools">
+                                <button class="icon-button mic-btn" title="Voice Input">
+                                    <span class="material-symbols-outlined">mic</span>
+                                </button>
+                                <button class="icon-button upload-btn" title="Upload Image">
+                                    <span class="material-symbols-outlined">image</span>
+                                </button>
+                            </div>
+                            <button class="send-btn" title="Send Request">
+                                <span class="material-symbols-outlined send-icon">arrow_upward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Chat Interface (Hidden by default) -->
+            <main class="chat-interface" id="chat-interface" style="display: none;">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages will be appended here -->
+                </div>
+
+                <div class="chat-input-wrapper">
+                    <div class="search-container chat-mode">
+                        <textarea class="search-input" id="chat-input" placeholder="Ask me anything about math...."
+                            rows="1"></textarea>
+                        <div class="search-footer">
+                            <div class="search-tools">
+                                <button class="icon-button mic-btn" title="Voice Input">
+                                    <span class="material-symbols-outlined">mic</span>
+                                </button>
+                                <button class="icon-button upload-btn" title="Upload Image">
+                                    <span class="material-symbols-outlined">image</span>
+                                </button>
+                            </div>
+                            <button class="send-btn" id="chat-send-btn" title="Send Request">
+                                <span class="material-symbols-outlined send-icon">arrow_upward</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chat-disclaimer">Sphinx-SCA BETA can make mistakes. Always verify important
+                        calculations.</div>
+                </div>
+            </main>
+
+
+            <!-- Coming Soon Modal -->
+            <div class="coming-soon-modal-overlay" id="coming-soon-modal">
+                <div class="coming-soon-modal-content">
+                    <div class="coming-soon-icon">
+                        <span class="material-symbols-outlined">construction</span>
+                    </div>
+                    <h2 class="coming-soon-title">Coming Soon!</h2>
+                    <p class="coming-soon-text">We are working hard to bring this feature to you. Voice input and image
+                        uploads
+                        will be available in the next major update.</p>
+                    <button class="coming-soon-btn" id="close-coming-soon">Got It</button>
                 </div>
             </div>
-            <div class="chat-disclaimer">Sphinx-SCA BETA can make mistakes. Always verify important calculations.</div>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <div class="footer-left"></div>
-        <div class="footer-center" style="font-weight: 600;">&copy; 2026 Sphinx-SCA BETA. All rights reserved.</div>
-        <div class="footer-right"></div>
-    </footer>
-
-    <!-- Coming Soon Modal -->
-    <div class="coming-soon-modal-overlay" id="coming-soon-modal">
-        <div class="coming-soon-modal-content">
-            <div class="coming-soon-icon">
-                <span class="material-symbols-outlined">construction</span>
-            </div>
-            <h2 class="coming-soon-title">Coming Soon!</h2>
-            <p class="coming-soon-text">We are working hard to bring this feature to you. Voice input and image uploads
-                will be available in the next major update.</p>
-            <button class="coming-soon-btn" id="close-coming-soon">Got It</button>
-        </div>
-    </div>
-    </div>
+        </div> <!-- End main-content-wrapper -->
+    </div> <!-- End app-layout -->
     <script type="module">
         import { supabase } from './supabaseClient.js';
 
+        // --- Sidebar Logic ---
+
+        async function fetchUserData(userId) {
+            const sidebarHistoryList = document.getElementById('sidebar-history-list');
+            try {
+                // Fetch user messages for history sidebar
+                const { data: messages, error } = await supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .eq('sender', 'user')
+                    .order('created_at', { ascending: false })
+                    .limit(10); // get top 10 recent chats
+
+                if (error) throw error;
+
+                if (sidebarHistoryList) {
+                    sidebarHistoryList.innerHTML = ''; // clear existing
+                    if (messages && messages.length > 0) {
+                        messages.forEach(msg => {
+                            const li = document.createElement('li');
+                            li.className = 'history-item';
+                            li.innerHTML = `
+                                <a href="#" class="history-link">
+                                    <span class="history-text">${msg.content}</span>
+                                </a>
+                            `;
+                            sidebarHistoryList.appendChild(li);
+                        });
+                    } else {
+                        sidebarHistoryList.innerHTML = '<li style="padding: 10px 16px; font-size: 13px; color: var(--text-gray);">No chats yet</li>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching chat history:', error);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async function () {
+            // --- Sidebar Toggle Logic ---
+            const mainSidebar = document.getElementById('main-sidebar');
+            const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+
+            if (sidebarToggleBtn && mainSidebar) {
+                sidebarToggleBtn.addEventListener('click', () => {
+                    mainSidebar.classList.toggle('collapsed');
+                });
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
 
             let currentUserId = null;
@@ -170,6 +258,9 @@
 
                 const container = document.getElementById('nav-profile-container');
                 container.style.display = 'block';
+
+                // Fetch initial user data for sidebar history
+                fetchUserData(session.user.id);
 
                 // Handle Logout
                 document.getElementById('logout-btn').addEventListener('click', async function (e) {
