@@ -57,6 +57,10 @@ body.app-page {
     background:
         linear-gradient(135deg, rgba(224, 112, 46, 0.92) 0%, rgba(193, 86, 28, 0.85) 100%),
         url('/bg.jpg') center/cover no-repeat fixed;
+    position: relative;
+    /* Context for children if needed */
+    padding-bottom: 150px;
+    /* Space for the floating chat box */
 }
 
 /* --- Main Sidebar (Index Page) --- */
@@ -75,9 +79,11 @@ body.app-page {
     flex-shrink: 0;
 }
 
-.main-sidebar.collapsed {
-    width: 68px;
-    /* Standard collapsed width */
+@media (min-width: 769px) {
+    .main-sidebar.collapsed {
+        width: 68px;
+        /* Standard collapsed width */
+    }
 }
 
 .sidebar-top {
@@ -259,48 +265,44 @@ body.app-page {
 }
 
 /* --- COLLAPSED STATE STYLES --- */
-.main-sidebar.collapsed .new-chat-sidebar-btn {
-    padding: 12px;
-    width: 46px;
-    /* Circle shape */
-    height: 46px;
-    justify-content: center;
-    border-radius: 50%;
-    margin: 0 auto;
-}
+@media (min-width: 769px) {
+    .main-sidebar.collapsed .new-chat-sidebar-btn {
+        padding: 12px;
+        width: 46px;
+        /* Circle shape */
+        height: 46px;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto;
+    }
 
-.main-sidebar.collapsed .new-chat-sidebar-btn .btn-text,
-.main-sidebar.collapsed .section-title,
-.main-sidebar.collapsed .history-text,
-.main-sidebar.collapsed .sidebar-nav-item .item-text {
-    opacity: 0;
-    width: 0;
-    display: none;
-    /* or visibility: hidden to preserve height/spacing if needed */
-}
+    .main-sidebar.collapsed .new-chat-sidebar-btn .btn-text,
+    .main-sidebar.collapsed .section-title,
+    .main-sidebar.collapsed .history-text,
+    .main-sidebar.collapsed .sidebar-nav-item .item-text {
+        opacity: 0;
+        width: 0;
+        display: none;
+        /* or visibility: hidden to preserve height/spacing if needed */
+    }
 
-.main-sidebar.collapsed .section-header {
-    justify-content: center;
-    padding: 0;
-}
+    .main-sidebar.collapsed .section-header {
+        justify-content: center;
+        padding: 0;
+    }
 
-.main-sidebar.collapsed .history-link {
-    padding: 10px;
-    justify-content: center;
-}
+    .main-sidebar.collapsed .sidebar-history-list {
+        display: none;
+    }
 
-/* If you want to show icon instead of text for collapsed history items */
-.main-sidebar.collapsed .history-link::before {
-    content: 'chat_bubble';
-    /* Material Icon ligature */
-    font-family: 'Material Symbols Outlined';
-    font-size: 18px;
-    color: var(--text-gray);
-}
+    .main-sidebar.collapsed .sidebar-nav-item {
+        justify-content: center;
+        padding: 12px;
+    }
 
-.main-sidebar.collapsed .sidebar-nav-item {
-    justify-content: center;
-    padding: 12px;
+    .main-sidebar.collapsed .sidebar-nav-item .item-text {
+        display: none;
+    }
 }
 
 /* Header */
@@ -440,6 +442,37 @@ body.app-page {
 .nav-profile:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(224, 112, 46, 0.4);
+}
+
+/* Standalone Theme Toggle specific to main nav */
+.nav-theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-gray);
+    border: 1px solid #E5E7EB;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 15px;
+}
+
+.nav-theme-toggle:hover {
+    background-color: #F3F4F6;
+    color: var(--text-black);
+}
+
+body.dark-theme .nav-theme-toggle {
+    border-color: #374151;
+    color: #9CA3AF;
+}
+
+body.dark-theme .nav-theme-toggle:hover {
+    background-color: #374151;
+    color: #F9FAFB;
 }
 
 /* Profile Dropdown Menu */
@@ -716,6 +749,35 @@ body.app-page {
     animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
 }
 
+/* Floating Wrapper for the Search Box */
+.floating-search-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 280px;
+    /* Default sidebar width */
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px 25px 20px;
+    background: transparent;
+    z-index: 100;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    /* Let clicks pass through background */
+}
+
+body.dark-theme .floating-search-wrapper {
+    background: transparent;
+}
+
+/* Ensure the collapsed sidebar changes the wrapper left offset */
+@media (min-width: 769px) {
+    body:has(.main-sidebar.collapsed) .floating-search-wrapper {
+        left: 68px;
+    }
+}
+
 /* Search Container — Premium Card Style */
 .search-container {
     background-color: #FFFFFF !important;
@@ -728,9 +790,9 @@ body.app-page {
     padding: 18px 18px 14px 22px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    margin-top: 16px;
     position: relative;
-    z-index: 5;
+    pointer-events: auto;
+    /* Re-enable pointer events for the box itself */
 }
 
 .search-container:focus-within {
@@ -738,6 +800,16 @@ body.app-page {
     transform: translateY(-3px);
     background-color: #FFFFFF !important;
     border-color: var(--bg-orange);
+}
+
+.chat-disclaimer {
+    font-size: 11px;
+    color: #FFFFFF;
+    margin-top: 12px;
+    text-align: center;
+    opacity: 0.8;
+    pointer-events: auto;
+    /* Allow text selection */
 }
 
 /* Textarea replaces plain input */
@@ -887,83 +959,108 @@ body.app-page {
 }
 
 @media (max-width: 768px) {
+    .floating-search-wrapper {
+        left: 0;
+        padding: 0 15px 15px 15px;
+    }
+
+    .search-container {
+        border-radius: 20px;
+        padding: 14px 14px 12px 16px;
+    }
+
+    .main-content-wrapper {
+        padding-bottom: 120px;
+    }
+
     .header {
         height: 70px;
-        padding: 0 20px;
+        padding: 0 15px;
+        gap: 10px;
     }
 
     .logo-text {
-        font-size: 20px;
+        font-size: 18px;
     }
 
     .logo-icon {
-        width: 50px;
-        height: 50px;
+        width: 45px;
+        height: 45px;
         margin-top: 5px;
-        /* Adjusting position down */
+    }
+
+    /* Main Sidebar goes Off-Canvas */
+    .main-sidebar {
+        position: fixed;
+        top: 0;
+        left: -320px;
+        width: 280px !important;
+        height: 100vh;
+        z-index: 1000;
+        box-shadow: 4px 0 25px rgba(0, 0, 0, 0.15);
+        transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .main-sidebar.mobile-open {
+        left: 0;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(3px);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+        opacity: 1;
+    }
+
+    .mobile-left-menu-btn {
+        display: flex !important;
+        background: none;
+        border: none;
+        color: var(--text-black);
+        padding: 5px;
+        cursor: pointer;
     }
 
     /* Mobile Navigation */
     .mobile-menu-btn {
-        display: flex;
+        display: none !important;
     }
 
     .nav {
-        position: fixed;
-        top: 0;
-        right: -300px;
-        width: 280px;
-        height: 100vh;
-        background-color: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(15px);
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 90px 30px 40px;
-        gap: 25px;
-        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
-        border-bottom-left-radius: 20px;
-        border-top-left-radius: 20px;
-        border-bottom-right-radius: 0;
-        transform: translateX(0);
-        opacity: 1;
-        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        z-index: 9;
-    }
-
-    .nav.active {
-        right: 0;
-        transform: none;
-    }
-
-    .profile-container:hover .profile-dropdown {
         position: static;
-        opacity: 1;
-        visibility: visible;
-        transform: none;
+        width: auto;
+        height: auto;
+        background-color: transparent;
+        flex-direction: row;
+        align-items: center;
+        padding: 0;
+        gap: 15px;
         box-shadow: none;
-        background: transparent;
-        border: none;
-        padding: 10px 0 0 10px;
+        transform: none;
+        border-radius: 0;
+        z-index: auto;
     }
 
-    .profile-dropdown {
-        position: static;
-        opacity: 1;
-        visibility: visible;
-        transform: none;
-        box-shadow: none;
-        background: transparent;
-        border: none;
-        padding: 10px 0 0 10px;
+    .nav>.nav-link:not(#nav-login-btn) {
         display: none;
     }
 
     .profile-container.active .profile-dropdown {
-        display: block;
-    }
-
-    .mobile-menu-btn {
-        z-index: 100;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
     }
 
     /* Hero adjustments */
@@ -1011,11 +1108,25 @@ body.app-page {
         text-align: center;
         flex: auto;
     }
+
+    .floating-search-wrapper {
+        left: 0;
+        padding: 0 15px 15px 15px;
+    }
+
+    .search-container {
+        border-radius: 20px;
+        padding: 14px 14px 12px 16px;
+    }
+
+    .main-content-wrapper {
+        padding-bottom: 120px;
+    }
 }
 
 @media (max-width: 480px) {
     .hero-title {
-        font-size: clamp(40px, 12vw, 60px);
+        font-size: clamp(32px, 10vw, 50px);
         letter-spacing: 2px;
     }
 
@@ -1031,12 +1142,14 @@ body.app-page {
     }
 
     .search-container {
-        padding: 12px 10px 8px 14px;
+        padding: 10px 10px 8px 12px;
         border-radius: 16px;
+        margin-top: 10px;
     }
 
     .search-input {
         font-size: 14px;
+        min-height: 24px;
     }
 }
 
@@ -1174,29 +1287,18 @@ body.app-page {
     max-width: 900px;
     margin: 0 auto;
     padding: 20px;
-    height: calc(100vh - 140px);
-    /* Height minus header and footer */
-    position: relative;
     animation: fadeIn 0.4s ease forwards;
 }
 
-.chat-messages {
+.chat-messages-wrapper {
     flex: 1;
-    overflow-y: auto;
-    padding: 20px 20px 120px 20px;
-    /* Extra bottom padding to ensure messages aren't hidden behind the floating input */
+    padding-bottom: 20px;
+}
+
+.chat-messages {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    scroll-behavior: smooth;
-
-    /* Hide scrollbar for cleaner look but keep functionality */
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-.chat-messages::-webkit-scrollbar {
-    display: none;
 }
 
 .message {
@@ -1318,38 +1420,7 @@ body.app-page {
     }
 }
 
-/* Chat Input Wrapper pinned at bottom */
-.chat-input-wrapper {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    width: 100%;
-    padding: 0 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Override some search container styles when in chat mode */
-.search-container.chat-mode {
-    background-color: #FFFFFF !important;
-    width: 100%;
-    max-width: 800px;
-    /* Keep consistent with hero size */
-    margin-top: 0;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    /* stronger shadow to lift off background */
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.chat-disclaimer {
-    font-size: 12px;
-    color: var(--text-white);
-    opacity: 0.8;
-    margin-top: 12px;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
+/* Removed old .chat-input-wrapper styles since we now use .floating-search-wrapper */
 
 @media (max-width: 768px) {
     .chat-interface {
@@ -1402,8 +1473,8 @@ body.app-page {
 }
 
 .coming-soon-icon {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     background: rgba(224, 112, 46, 0.1);
     color: var(--bg-orange);
     border-radius: 50%;
@@ -1451,4 +1522,155 @@ body.app-page {
     background: #333;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* --- DARK THEME OVERRIDES --- */
+
+body.dark-theme {
+    --text-black: #F9FAFB;
+    --text-white: #1F2937;
+    --text-gray: #9CA3AF;
+    --hover-dark: #374151;
+    background-color: #111827 !important;
+    background-image: none !important;
+}
+
+body.dark-theme .main-content-wrapper {
+    background: #111827 !important;
+}
+
+body.dark-theme .header,
+body.dark-theme .profile-dropdown {
+    background-color: rgba(31, 41, 55, 0.98);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .search-container {
+    background-color: #1F2937 !important;
+    border-color: #374151;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .search-container:focus-within {
+    border-color: var(--bg-orange);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .search-input {
+    color: #F9FAFB;
+}
+
+body.dark-theme .search-input::placeholder {
+    color: #6B7280;
+}
+
+body.dark-theme .send-btn {
+    background: linear-gradient(135deg, var(--bg-orange) 0%, #C15E22 100%);
+    box-shadow: 0 3px 10px rgba(224, 112, 46, 0.3);
+}
+
+body.dark-theme .send-btn:hover {
+    background: linear-gradient(135deg, #FFB870 0%, var(--bg-orange) 100%);
+    box-shadow: 0 6px 18px rgba(224, 112, 46, 0.5);
+}
+
+body.dark-theme .menu-toggle-btn:hover,
+body.dark-theme .history-link:hover,
+body.dark-theme .sidebar-nav-item:hover,
+body.dark-theme .icon-button:hover,
+body.dark-theme .dropdown-item:hover {
+    background-color: #374151;
+}
+
+body.dark-theme .new-chat-sidebar-btn {
+    border-color: #374151;
+    color: #F9FAFB;
+}
+
+body.dark-theme .new-chat-sidebar-btn:hover {
+    background-color: #374151;
+    border-color: #4B5563;
+}
+
+body.dark-theme .main-sidebar,
+body.dark-theme .sidebar {
+    background-color: #1F2937;
+    border-right-color: #374151;
+}
+
+body.dark-theme .sidebar-top,
+body.dark-theme .sidebar-bottom {
+    border-bottom-color: #374151;
+    border-top-color: #374151;
+}
+
+body.dark-theme .ai-message .message-content {
+    background: rgba(31, 41, 55, 0.95);
+    border-color: #374151;
+    color: #F9FAFB;
+}
+
+body.dark-theme .footer {
+    background-color: rgba(31, 41, 55, 0.95);
+    border-top-color: #374151;
+    color: #9CA3AF;
+}
+
+/* Dashboard specific dark theme */
+body.dark-theme.dashboard-page {
+    background: #111827 !important;
+}
+
+body.dark-theme .dashboard-title {
+    color: #F9FAFB;
+}
+
+body.dark-theme .stat-card,
+body.dark-theme .recent-section {
+    border-color: #374151;
+    background-color: #1F2937;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme .activity-item {
+    border-bottom-color: #374151;
+}
+
+body.dark-theme .sidebar-divider,
+body.dark-theme .dropdown-divider {
+    background-color: #374151;
+}
+
+body.dark-theme .activity-icon {
+    background-color: #374151;
+    color: #9CA3AF;
+}
+
+body.dark-theme .activity-date {
+    color: #6B7280;
+}
+
+body.dark-theme .mobile-left-menu-btn {
+    color: #F9FAFB;
+}
+
+body.dark-theme .auth-modal-content,
+body.dark-theme .coming-soon-modal-content {
+    background: #1F2937;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    color: #F9FAFB;
+}
+
+body.dark-theme .auth-modal-content h2,
+body.dark-theme .coming-soon-title {
+    color: #F9FAFB;
+}
+
+body.dark-theme .login-modal-btn {
+    background: #374151;
+    color: #F9FAFB;
+}
+
+body.dark-theme .login-modal-btn:hover {
+    background: #4B5563;
 }

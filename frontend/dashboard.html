@@ -12,6 +12,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Theme Initialization Script (Before render) -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark-theme');
+            }
+        })();
+    </script>
+
     <!-- Material Icons -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -285,7 +295,47 @@
 
         @media (max-width: 900px) {
             .sidebar {
+                position: fixed;
+                top: 0;
+                left: -320px;
+                width: 280px !important;
+                height: 100vh;
+                z-index: 1000;
+                box-shadow: 4px 0 25px rgba(0, 0, 0, 0.15);
+                transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .sidebar.mobile-open {
+                left: 0;
+            }
+
+            .sidebar-overlay {
                 display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.4);
+                backdrop-filter: blur(3px);
+                z-index: 999;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-left-menu-btn {
+                display: flex !important;
+                background: none;
+                border: none;
+                color: var(--text-black);
+                padding: 5px;
+                cursor: pointer;
+                margin-right: 15px;
             }
         }
 
@@ -338,7 +388,15 @@
 </head>
 
 <body class="dashboard-page">
+    <script>
+        if (document.documentElement.classList.contains('dark-theme')) {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
     <header class="header">
+        <button class="mobile-left-menu-btn" id="mobile-left-menu-btn" style="display: none;">
+            <span class="material-symbols-outlined" style="font-size: 28px;">menu</span>
+        </button>
         <div class="logo-container" onclick="window.location.href='index.html'">
             <img src="logo.png" alt="Sphinx-SCA Logo" class="logo-icon">
             <div class="logo-text">
@@ -347,12 +405,10 @@
             </div>
         </div>
 
-        <button class="mobile-menu-btn" id="mobile-menu-btn">
-            <span class="material-symbols-outlined">menu</span>
-        </button>
         <nav class="nav">
-            <a href="index.html" class="nav-link">Home</a>
-            <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <button class="nav-theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                <span class="material-symbols-outlined theme-icon">dark_mode</span>
+            </button>
             <a href="login.html" class="nav-link" id="nav-login-btn">log in</a>
 
             <div class="profile-container" id="nav-profile-container">
@@ -366,7 +422,6 @@
                         <span class="material-symbols-outlined">settings</span>
                         Settings
                     </a>
-                    <div class="dropdown-divider"></div>
                     <a href="#" class="dropdown-item logout" id="logout-btn">
                         <span class="material-symbols-outlined">logout</span>
                         Log Out
@@ -376,9 +431,18 @@
         </nav>
     </header>
 
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
     <div class="dashboard-layout">
-        <aside class="sidebar">
+        <aside class="sidebar" id="dashboard-sidebar">
             <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="index.html" class="sidebar-link">
+                        <span class="material-symbols-outlined">home</span>
+                        Home
+                    </a>
+                </li>
                 <li class="sidebar-item">
                     <a href="dashboard.html" class="sidebar-link active">
                         <span class="material-symbols-outlined">grid_view</span>
@@ -642,23 +706,48 @@
                 }
             }
 
-            // Mobile menu toggle
-            const menuBtn = document.getElementById('mobile-menu-btn');
-            const nav = document.querySelector('.nav');
+            // Mobile left menu toggle (Sidebar)
+            const mobileLeftMenuBtn = document.getElementById('mobile-left-menu-btn');
+            const dashboardSidebar = document.getElementById('dashboard-sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-            if (menuBtn && nav) {
-                menuBtn.addEventListener('click', () => {
-                    nav.classList.toggle('active');
-                    const icon = menuBtn.querySelector('.material-symbols-outlined');
-                    if (nav.classList.contains('active')) {
-                        icon.textContent = 'close';
-                    } else {
-                        icon.textContent = 'menu';
-                    }
+            if (mobileLeftMenuBtn && dashboardSidebar) {
+                mobileLeftMenuBtn.addEventListener('click', () => {
+                    dashboardSidebar.classList.add('mobile-open');
+                    if (sidebarOverlay) sidebarOverlay.classList.add('active');
                 });
             }
 
-            // Profile dropdown toggle on mobile
+            if (sidebarOverlay && dashboardSidebar) {
+                sidebarOverlay.addEventListener('click', () => {
+                    dashboardSidebar.classList.remove('mobile-open');
+                    sidebarOverlay.classList.remove('active');
+                });
+            }
+
+            // --- Profile dropdown & Theme logic ---
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const themeIcon = themeToggleBtn ? themeToggleBtn.querySelector('.theme-icon') : null;
+
+            // Update UI based on current theme
+            function updateThemeUI() {
+                if (!themeIcon) return;
+                const isDark = document.body.classList.contains('dark-theme');
+                themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+            }
+            updateThemeUI();
+
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.documentElement.classList.toggle('dark-theme');
+                    document.body.classList.toggle('dark-theme');
+                    const isDark = document.body.classList.contains('dark-theme');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    updateThemeUI();
+                });
+            }
+
             const profileContainer = document.getElementById('nav-profile-container');
             if (profileContainer) {
                 profileContainer.addEventListener('click', (e) => {
