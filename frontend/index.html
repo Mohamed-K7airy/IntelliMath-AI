@@ -423,12 +423,24 @@
                         saveMessageToSupabase(msg, 'user');
                         searchInput.value = '';
                         autoResize(searchInput);
+
+                        // AI response
+                        setTimeout(() => {
+                            addMessage("قريبا", 'ai');
+                            saveMessageToSupabase("قريبا", 'ai');
+                        }, 500);
                     }, 400); // 400ms matches the CSS transition duration
                 } else {
                     addMessage(msg, 'user');
                     saveMessageToSupabase(msg, 'user');
                     searchInput.value = '';
                     autoResize(searchInput);
+
+                    // AI response
+                    setTimeout(() => {
+                        addMessage("قريبا", 'ai');
+                        saveMessageToSupabase("قريبا", 'ai');
+                    }, 500);
                 }
             }
 
