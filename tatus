@@ -1,0 +1,72 @@
+[33mfb5f15d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m test2
+[33m0b36497[m TEST
+[33m13724e1[m CHAT
+[33meec75f8[m GUI UP 2
+[33m3f95a80[m dark mode
+[33m87d7cb7[m rd
+[33mf12e31a[m hidden
+[33mc8efcf4[m 3
+[33m623c384[m v2 gui
+[33ma798ae9[m GUI UP
+[33mebc8794[m Remove backend test :Khairy
+[33made3755[m test2
+[33m4662ac3[m UP logo & wel
+[33m44e5a31[m test
+[33m686c931[m Update start_server.bat to use correct Python path
+[33m7150c84[m Fix gitignore and add backend with start_server.bat
+[33m80c5824[m Update frontend to connect to local backend (port 8000)
+[33m4e56a8b[m Untrack node_modules to avoid Vercel build limits
+[33m85f6e15[m Fix Vercel deployment size by removing unused ML dependencies
+[33m499a903[m Remove legacy backend files
+[33m326d6eb[m Configure API for Vercel deployment
+[33m60b55de[m Add CORS to app.py to fix connection error
+[33me593bbb[m Fix API endpoint to use /classify
+[33m61284df[m Update API endpoint to Render backend
+[33m284701f[m to
+[33mb9e9a3f[m Add chat endpoint and update home message
+[33ma45f9ab[m Initialize FastAPI application with home route
+[33me817520[m Reorder torch and sentencepiece in requirements
+[33mdf61eba[m Replace Flask with FastAPI and Uvicorn
+[33m943b1a3[m Add required packages to requirements.txt
+[33m3757cc4[m Add Python version to runtime.txt
+[33m57eb0a9[m logo5
+[33mcbd2d6c[m logo 4
+[33m6cbee6b[m last logo
+[33m09edbae[m up logo
+[33m29368b6[m LOGO UP
+[33m1fe2629[m fix: use HF router directly with token
+[33m668659d[m fix: correct HF router URL and env var name
+[33m07246ab[m fix: update HuggingFace API URL to router endpoint
+[33m938e1c1[m vercel api proxy for huggingface
+[33m6913e09[m API Edit without token
+[33mbd90f8c[m backend
+[33mbf8d998[m Rename website to Sphinx-SCA BETA
+[33md1cbec5[m Enhance chat scroll behavior and padding for better UX
+[33m563701d[m Redesign chat interface UI for a premium, modern look
+[33ma79a95c[m Update UI to display only the subject name
+[33m8058fc6[m Map classification model output labels to English subject names
+[33m2c53506[m Integrate backend math classification model with frontend UI (exclude model binaries)
+[33md47946d[m update index.html
+[33m599fdd5[m fix: keep welcome screen visible on reload
+[33m2ca3486[m feat: Add Problem Solved, Recent Activity, and Chat History
+[33mea4ac61[m feat: Save chat messages to Supabase
+[33mae133c7[m Refactor OAuth buttons to square horizontal container
+[33m58cff55[m Add Facebook and GitHub login options
+[33m20f61eb[m Add animated Sphinx-GPT hero avatar to home page
+[33m94e006d[m Make subtitle badge responsive on mobile devices
+[33m62c836f[m Add stylized hero subtitle badge
+[33m92696fa[m Add smooth transition animation from hero to chat interface
+[33mfb4caac[m Increase WELCOME text size and fix search bar overlap on mobile
+[33mf780dbb[m Fix mobile layouts on home and auth pages
+[33m7b9a40c[m Change Google OAuth to open in a popup window
+[33m6c99951[m Add Google OAuth login and signup buttons
+[33mf5e789f[m Add website logo as a favicon
+[33m25fbe45[m Fix search container alignment on mobile using CSS grid
+[33m5e1f101[m Fix mobile responsiveness padding and container overflows
+[33m183da9e[m Fix dashboard styling and move static assets to public
+[33m02e367b[m Fix Vite Vercel execution error
+[33mf27f86e[m first commit
+[33mf2b4fa1[m remove vite build script
+[33m85a3162[m fix vercel routing
+[33m6a09a43[m fix 404 routing
+[33m9167a11[m first commit

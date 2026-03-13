@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sphinx-SCA BETA</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+
+    <!-- Google Fonts for Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Theme Initialization Script (Before render) -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark-theme');
+            }
+        })();
+    </script>
+
+    <!-- Material Icons for UI elements -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="app-page">
+    <script>
+        if (document.documentElement.classList.contains('dark-theme')) {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+    <div class="app-layout">
+        <!-- Main Sidebar -->
+        <aside class="main-sidebar collapsed" id="main-sidebar">
+            <div class="sidebar-top">
+                <button class="menu-toggle-btn" id="sidebar-toggle-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </div>
+
+            <div class="sidebar-action">
+                <button class="new-chat-sidebar-btn" onclick="window.location.reload();">
+                    <span class="material-symbols-outlined">add</span>
+                    <span class="btn-text">New chat</span>
+                </button>
+            </div>
+
+            <div class="sidebar-scrollable">
+                <div class="sidebar-section hover-expand">
+                    <div class="section-header">
+                        <span class="material-symbols-outlined section-icon">history</span>
+                        <span class="section-title">Recent</span>
+                    </div>
+                    <ul class="sidebar-history-list" id="sidebar-history-list">
+                        <!-- History items populated via JS -->
+                    </ul>
+                </div>
+            </div>
+
+            <div class="sidebar-bottom">
+                <a href="index.html" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="item-text">Home</span>
+                </a>
+                <a href="dashboard.html" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="item-text">Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="item-text">Settings</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile sidebar -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Main Content Area -->
+        <div class="main-content-wrapper">
+            <header class="header">
+                <button class="mobile-left-menu-btn" id="mobile-left-menu-btn" style="display: none;">
+                    <span class="material-symbols-outlined" style="font-size: 28px;">menu</span>
+                </button>
+                <div class="logo-container">
+                    <img src="logo.png" alt="Sphinx-SCA Logo" class="logo-icon">
+                    <div class="logo-text">
+                        <span class="logo-sphinx">Sphinx</span><span class="logo-sca">-SCA</span><span
+                            style="font-size: 14px; font-weight: 800; color: var(--bg-orange); margin-left: 6px; vertical-align: middle;">BETA</span>
+                    </div>
+                </div>
+
+                <nav class="nav">
+                    <button class="nav-theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                        <span class="material-symbols-outlined theme-icon">dark_mode</span>
+                    </button>
+                    <a href="login.html" class="nav-link" id="nav-login-btn">log in</a>
+
+                    <div class="profile-container" id="nav-profile-container">
+                        <div class="nav-profile" id="nav-user-avatar" title="Your Account"></div>
+                        <div class="profile-dropdown">
+                            <a href="dashboard.html" class="dropdown-item">
+                                <span class="material-symbols-outlined">person</span>
+                                Profile
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <span class="material-symbols-outlined">settings</span>
+                                Settings
+                            </a>
+                            <a href="#" class="dropdown-item logout" id="logout-btn">
+                                <span class="material-symbols-outlined">logout</span>
+                                Log Out
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+            </header>
+
+            <main class="hero">
+                <div class="hero-content">
+                    <div class="hero-avatar-container">
+                        <img src="logo.png" alt="Sphinx-SCA AI" class="hero-avatar">
+                    </div>
+                    <h1 class="hero-title">WELCOME</h1>
+
+                    <div class="pharaonic-line">
+                        <div class="diamond"></div>
+                        <div class="line"></div>
+                        <div class="diamond center"></div>
+                        <div class="line"></div>
+                        <div class="diamond"></div>
+                    </div>
+
+                    <p class="hero-subtitle">Math Solver &amp; AI Assistant</p>
+                </div>
+            </main>
+
+            <!-- Chat Interface (Hidden by default) -->
+            <main class="chat-interface" id="chat-interface" style="display: none;">
+                <div class="chat-messages-wrapper" id="chat-messages-wrapper">
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Messages will be appended here -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- Floating Unified Search Container -->
+            <div class="floating-search-wrapper" id="floating-search-wrapper">
+                <div class="search-container">
+                    <textarea class="search-input" id="main-search-input" placeholder="Ask me anything about math...."
+                        rows="1"></textarea>
+                    <div class="search-footer">
+                        <div class="search-tools">
+                            <button class="icon-button mic-btn" title="Voice Input">
+                                <span class="material-symbols-outlined">mic</span>
+                            </button>
+                            <button class="icon-button upload-btn" title="Upload Image">
+                                <span class="material-symbols-outlined">image</span>
+                            </button>
+                        </div>
+                        <button class="send-btn" id="main-send-btn" title="Send Request">
+                            <span class="material-symbols-outlined send-icon">arrow_upward</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="chat-disclaimer">Sphinx-SCA BETA can make mistakes. Always verify important calculations.
+                </div>
+            </div>
+
+
+            <!-- Coming Soon Modal -->
+            <div class="coming-soon-modal-overlay" id="coming-soon-modal">
+                <div class="coming-soon-modal-content">
+                    <div class="coming-soon-icon">
+                        <span class="material-symbols-outlined">construction</span>
+                    </div>
+                    <h2 class="coming-soon-title">Coming Soon!</h2>
+                    <p class="coming-soon-text">We are working hard to bring this feature to you. Voice input and image
+                        uploads
+                        will be available in the next major update.</p>
+                    <button class="coming-soon-btn" id="close-coming-soon">Got It</button>
+                </div>
+            </div>
+        </div> <!-- End main-content-wrapper -->
+    </div> <!-- End app-layout -->
+    <script type="module">
+        import { supabase } from './supabaseClient.js';
+
+        // Function to generate a UUID for sessions
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        async function fetchUserData(userId) {
+            const sidebarHistoryList = document.getElementById('sidebar-history-list');
+            try {
+                // Fetch recent messages to group by session
+                // We fetch the last 100 messages to find recent unique sessions
+                const { data: messages, error } = await supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (error) throw error;
+
+                if (sidebarHistoryList) {
+                    sidebarHistoryList.innerHTML = ''; // clear existing
+                    if (messages && messages.length > 0) {
+                        const sessions = [];
+                        const seenSessions = new Set();
+
+                        // Extract unique sessions based on the latest user message of that session
+                        messages.forEach(msg => {
+                            if (!msg.session_id) return; // Skip legacy messages without session_id
+
+                            // Only count the session if we find a user message to use as the title
+                            if (!seenSessions.has(msg.session_id)) {
+                                if (msg.sender === 'user') {
+                                    seenSessions.add(msg.session_id);
+                                    sessions.push(msg);
+                                }
+                            }
+                        });
+
+                        // Limit to top 15 recent sessions
+                        const topSessions = sessions.slice(0, 15);
+
+                        if (topSessions.length > 0) {
+                            topSessions.forEach(sessionMsg => {
+                                const li = document.createElement('li');
+                                li.className = 'history-item';
+                                li.innerHTML = `
+                                    <a href="#" class="history-link" data-session-id="${sessionMsg.session_id}">
+                                        <span class="history-text"></span>
+                                    </a>
+                                `;
+                                li.querySelector('.history-text').textContent = sessionMsg.content;
+
+                                // Add click event to load the session
+                                li.querySelector('.history-link').addEventListener('click', (e) => {
+                                    e.preventDefault();
+                                    loadSession(sessionMsg.session_id, sessionMsg.user_id);
+                                });
+
+                                sidebarHistoryList.appendChild(li);
+                            });
+                        } else {
+                            sidebarHistoryList.innerHTML = '<li style="padding: 10px 16px; font-size: 13px; color: var(--text-gray);">No specific chats yet</li>';
+                        }
+                    } else {
+                        sidebarHistoryList.innerHTML = '<li style="padding: 10px 16px; font-size: 13px; color: var(--text-gray);">No chats yet</li>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching chat history:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // --- Sidebar Toggle Logic ---
+            const mainSidebar = document.getElementById('main-sidebar');
+            const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+            const mobileLeftMenuBtn = document.getElementById('mobile-left-menu-btn');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+            if (sidebarToggleBtn && mainSidebar) {
+                sidebarToggleBtn.addEventListener('click', () => {
+                    // On mobile, the button inside sidebar will just close it
+                    if (window.innerWidth <= 768) {
+                        mainSidebar.classList.remove('mobile-open');
+                        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+                    } else {
+                        mainSidebar.classList.toggle('collapsed');
+                    }
+                });
+            }
+
+            if (mobileLeftMenuBtn && mainSidebar) {
+                mobileLeftMenuBtn.addEventListener('click', () => {
+                    mainSidebar.classList.add('mobile-open');
+                    if (sidebarOverlay) sidebarOverlay.classList.add('active');
+                });
+            }
+
+            if (sidebarOverlay && mainSidebar) {
+                sidebarOverlay.addEventListener('click', () => {
+                    mainSidebar.classList.remove('mobile-open');
+                    sidebarOverlay.classList.remove('active');
+                });
+            }
+
+            const { data: { session } } = await supabase.auth.getSession();
+
+            let currentUserId = null;
+            let currentSessionId = generateUUID(); // Start a new session by default
+
+            if (session) {
+                currentUserId = session.user.id;
+
+                // Try to get name from user metadata, fallback to email prefix
+                const userMetadata = session.user.user_metadata;
+                let firstName = 'User';
+                if (userMetadata && userMetadata.name) {
+                    firstName = userMetadata.name.split(' ')[0];
+                } else if (session.user.email) {
+                    firstName = session.user.email.split('@')[0];
+                }
+                const initial = firstName.charAt(0).toUpperCase();
+
+                // Hide login link, show avatar container
+                document.getElementById('nav-login-btn').style.display = 'none';
+
+                const avatar = document.getElementById('nav-user-avatar');
+                avatar.innerHTML = `<img src="user.png" alt="${firstName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+
+                const container = document.getElementById('nav-profile-container');
+                container.style.display = 'block';
+
+                // Fetch initial user data for sidebar history
+                fetchUserData(session.user.id);
+
+                // Handle Logout
+                document.getElementById('logout-btn').addEventListener('click', async function (e) {
+                    e.preventDefault();
+                    await supabase.auth.signOut();
+                    window.location.reload();
+                });
+            }
+
+            async function saveMessageToSupabase(content, sender) {
+                if (!currentUserId) {
+                    console.warn('User is not logged in. Message not saved.');
+                    return;
+                }
+
+                const { data, error } = await supabase
+                    .from('messages')
+                    .insert([
+                        {
+                            user_id: currentUserId,
+                            session_id: currentSessionId,
+                            content: content,
+                            sender: sender
+                        }
+                    ]);
+
+                if (error) {
+                    console.error('Error saving message:', error);
+                    throw error; // Throw so caller can catch or wait
+                } else {
+                    console.log('Message saved successfully!');
+                    return data;
+                }
+            }
+
+            // --- Load Session Logic ---
+            window.loadSession = async function (sessionId, userId) {
+                try {
+                    // Close sidebar on mobile
+                    const mainSidebar = document.getElementById('main-sidebar');
+                    const sidebarOverlay = document.getElementById('sidebar-overlay');
+                    if (window.innerWidth <= 768) {
+                        if (mainSidebar) mainSidebar.classList.remove('mobile-open');
+                        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+                    }
+
+                    // Fetch messages
+                    const { data: messages, error } = await supabase
+                        .from('messages')
+                        .select('*')
+                        .eq('session_id', sessionId)
+                        .order('created_at', { ascending: true }); // chronological order
+
+                    if (error) throw error;
+
+                    currentSessionId = sessionId; // update active session
+                    const chatMessages = document.getElementById('chat-messages');
+                    chatMessages.innerHTML = ''; // clear current view
+
+                    if (messages && messages.length > 0) {
+                        // Get username if available
+                        let userName = 'User';
+                        const avatarImg = document.querySelector('#nav-user-avatar img');
+                        if (avatarImg) userName = avatarImg.alt;
+
+                        messages.forEach(msg => {
+                            addMessage(msg.content, msg.sender, userName);
+                        });
+                    }
+
+                    // Show chat interface
+                    const heroSection = document.querySelector('.hero');
+                    const chatInterface = document.getElementById('chat-interface');
+                    heroSection.style.display = 'none';
+                    chatInterface.style.display = 'flex';
+                    isChatActive = true;
+
+                    // Scroll to bottom
+                    const scrollWrapper = document.getElementById('chat-interface');
+                    scrollWrapper.scrollTop = scrollWrapper.scrollHeight;
+
+                } catch (error) {
+                    console.error('Error loading session:', error);
+                    alert('Could not load chat history.');
+                }
+            };
+
+            // --- Profile dropdown & Theme logic ---
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const themeIcon = themeToggleBtn ? themeToggleBtn.querySelector('.theme-icon') : null;
+
+            // Update UI based on current theme
+            function updateThemeUI() {
+                if (!themeIcon) return;
+                const isDark = document.body.classList.contains('dark-theme');
+                themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+            }
+            updateThemeUI();
+
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.documentElement.classList.toggle('dark-theme');
+                    document.body.classList.toggle('dark-theme');
+                    const isDark = document.body.classList.contains('dark-theme');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    updateThemeUI();
+                });
+            }
+
+            const profileContainer = document.getElementById('nav-profile-container');
+            if (profileContainer) {
+                profileContainer.addEventListener('click', (e) => {
+                    // Only toggle on mobile (when window width is small)
+                    if (window.innerWidth <= 768) {
+                        profileContainer.classList.toggle('active');
+                    }
+                });
+            }
+
+            // --- Chat Interface Logic ---
+            const heroSection = document.querySelector('.hero');
+            const chatInterface = document.getElementById('chat-interface');
+            const searchInput = document.getElementById('main-search-input');
+            const sendBtn = document.getElementById('main-send-btn');
+            const chatMessages = document.getElementById('chat-messages');
+
+            let isChatActive = false;
+
+            // Auto-resize textarea
+            function autoResize(el) {
+                el.style.height = 'auto';
+                el.style.height = Math.min(el.scrollHeight, 180) + 'px';
+            }
+            searchInput.addEventListener('input', () => autoResize(searchInput));
+
+            // Function to add a message bubble
+            function addMessage(text, sender, userName = 'User') {
+                const msgDiv = document.createElement('div');
+                msgDiv.classList.add('message', `${sender}-message`);
+
+                if (sender === 'ai') {
+                    msgDiv.innerHTML = `
+                        <div class="message-avatar">
+                            <img src="logo.png" alt="AI">
+                        </div>
+                        <div class="message-content">
+                            <p>${text}</p>
+                        </div>
+                    `;
+                } else {
+                    msgDiv.innerHTML = `
+                        <div class="message-content">
+                            <p>${text}</p>
+                        </div>
+                        <div class="message-avatar">
+                            <img src="user.png" alt="${userName}">
+                        </div>
+                    `;
+                }
+
+                chatMessages.appendChild(msgDiv);
+                // Auto-scroll the chat
+                const scrollWrapper = document.getElementById('chat-interface');
+                scrollWrapper.scrollTop = scrollWrapper.scrollHeight;
+            }
+
+            async function handleSend() {
+                const msg = searchInput.value;
+                if (!msg.trim()) return;
+
+                // 1. Show message in UI
+                if (!isChatActive) {
+                    isChatActive = true;
+                    heroSection.classList.add('animate-out');
+                    setTimeout(async () => {
+                        heroSection.style.display = 'none';
+                        chatInterface.style.display = 'flex';
+                        addMessage(msg, 'user');
+                        await saveMessageToSupabase(msg, 'user'); // Save user message
+                    }, 400);
+                } else {
+                    addMessage(msg, 'user');
+                    await saveMessageToSupabase(msg, 'user'); // Save user message
+                }
+
+                searchInput.value = '';
+                autoResize(searchInput);
+
+                // 2. Connect to Backend
+                try {
+                    // The backend is ALWAYS on Railway, regardless of where the frontend is hosted
+                    // (Vercel, locally, or Railway itself)
+                    const API_URL = "https://sphinx-gpt-beta-production.up.railway.app";
+
+                    // Disable button during request
+                    const sendBtnIcon = sendBtn.querySelector('.send-icon');
+                    sendBtn.disabled = true;
+                    sendBtnIcon.textContent = 'pending'; // visually indicate loading
+
+                    // Build history array from current loaded messages
+                    const historyForBackend = [];
+                    const messageElements = chatMessages.querySelectorAll('.message');
+                    // Add all messages EXCEPT the very last one we just added (the current question)
+                    for (let i = 0; i < messageElements.length - 1; i++) {
+                        const el = messageElements[i];
+                        const isUser = el.classList.contains('user-message');
+                        const text = el.querySelector('p').textContent;
+                        historyForBackend.push({
+                            role: isUser ? "user" : "assistant",
+                            content: text
+                        });
+                    }
+
+                    const response = await fetch(`${API_URL}/solve`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            question: msg,
+                            user_id: currentUserId,
+                            history: historyForBackend
+                        })
+                    });
+
+                    // Re-enable button
+                    sendBtn.disabled = false;
+                    sendBtnIcon.textContent = 'arrow_upward';
+
+                    if (!response.ok) {
+                        throw new Error(`Server Error (${response.status}): ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.success) {
+                        const aiResponse = result.final_answer || result.answer || "No response content.";
+                        addMessage(aiResponse, 'ai');
+                        await saveMessageToSupabase(aiResponse, 'ai');
+                        if (currentUserId) fetchUserData(currentUserId);
+                    } else {
+                        addMessage(`⚠️ App Error: ${result.error || "Unknown issue"}`, 'ai');
+                    }
+                } catch (error) {
+                    console.error("Fetch error details:", error);
+                    // Reset button on error
+                    sendBtn.disabled = false;
+                    const sendBtnIcon = sendBtn.querySelector('.send-icon');
+                    sendBtnIcon.textContent = 'arrow_upward';
+
+                    addMessage(`❌ Connection Failed: ${error.message}. Please check if the backend is awake.`, 'ai');
+                }
+            }
+            // Event Listeners for Unified Search
+            sendBtn.addEventListener('click', handleSend);
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+
+            // Event Listeners for Mic and Upload Buttons
+            const micBtns = document.querySelectorAll('.mic-btn');
+            const uploadBtns = document.querySelectorAll('.upload-btn');
+            const comingSoonModal = document.getElementById('coming-soon-modal');
+            const closeComingSoonBtn = document.getElementById('close-coming-soon');
+
+            function showComingSoon(e) {
+                e.preventDefault();
+                comingSoonModal.style.display = 'flex';
+            }
+
+            micBtns.forEach(btn => btn.addEventListener('click', showComingSoon));
+            uploadBtns.forEach(btn => btn.addEventListener('click', showComingSoon));
+
+            if (closeComingSoonBtn) {
+                closeComingSoonBtn.addEventListener('click', () => {
+                    comingSoonModal.style.display = 'none';
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,24 @@
+services:
+  # 1. Backend Service (FastAPI)
+  - type: web
+    name: math-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+
+  # 2. Frontend Service (Vite Static Site)
+  - type: web
+    name: math-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    # If the Vite app needs to know the backend URL, it can be passed automatically:
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: math-backend
+          envVarKey: RENDER_EXTERNAL_URL
