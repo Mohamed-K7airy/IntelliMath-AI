@@ -409,6 +409,8 @@
             <button class="nav-theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode">
                 <span class="material-symbols-outlined theme-icon">dark_mode</span>
             </button>
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="about.html" class="nav-link">About Us</a>
             <a href="login.html" class="nav-link" id="nav-login-btn">log in</a>
 
             <div class="profile-container" id="nav-profile-container">
@@ -447,6 +449,12 @@
                     <a href="dashboard.html" class="sidebar-link active">
                         <span class="material-symbols-outlined">grid_view</span>
                         Overview
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="about.html" class="sidebar-link">
+                        <span class="material-symbols-outlined">info</span>
+                        About Us
                     </a>
                 </li>
                 <!-- Chat History Section -->
@@ -632,31 +640,47 @@
             async function fetchUserData(userId) {
                 try {
                     // Fetch all user messages
-                    const { data: messages, error } = await supabase
+                    const { data: allMessages, error } = await supabase
                         .from('messages')
                         .select('*')
                         .eq('user_id', userId)
                         .eq('sender', 'user')
-                        .order('created_at', { ascending: false });
+                        .order('created_at', { ascending: true }); // Order ascending to get the FIRST message easily
 
                     if (error) throw error;
 
-                    // 1. Update Problems Solved (Count of user messages)
+                    // Group by session_id
+                    const sessionsMap = new Map();
+                    if (allMessages) {
+                        allMessages.forEach(msg => {
+                            const sid = msg.session_id || 'default';
+                            if (!sessionsMap.has(sid)) {
+                                sessionsMap.set(sid, msg); // Store the first message of each session
+                            }
+                        });
+                    }
+
+                    // Convert map to array and sort by latest session first
+                    const uniqueSessions = Array.from(sessionsMap.values()).sort((a, b) => 
+                        new Date(b.created_at) - new Date(a.created_at)
+                    );
+
+                    // 1. Update Problems Solved (Count of unique sessions)
                     const problemsSolvedStat = document.getElementById('problems-solved-stat');
-                    if (problemsSolvedStat && messages) {
-                        problemsSolvedStat.textContent = messages.length;
+                    if (problemsSolvedStat) {
+                        problemsSolvedStat.textContent = uniqueSessions.length;
                     }
 
                     // 2. Update Recent Activity & Chat History
                     const recentActivityList = document.getElementById('recent-activity-list');
                     const chatHistoryList = document.getElementById('chat-history-list');
 
-                    if (messages && messages.length > 0) {
+                    if (uniqueSessions.length > 0) {
                         if (recentActivityList) recentActivityList.innerHTML = '';
                         if (chatHistoryList) chatHistoryList.innerHTML = '';
 
-                        messages.forEach((msg, index) => {
-                            const dateObj = new Date(msg.created_at);
+                        uniqueSessions.forEach((sessionMsg, index) => {
+                            const dateObj = new Date(sessionMsg.created_at);
                             const dateStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                             const timeStr = dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
@@ -676,21 +700,21 @@
                                     <div class="status-badge">Solved</div>
                                     <div class="activity-date">${dateStr}, ${timeStr}</div>
                                 `;
-                                li.querySelector('.activity-title').textContent = msg.content;
+                                li.querySelector('.activity-title').textContent = sessionMsg.content;
                                 recentActivityList.appendChild(li);
                             }
 
-                            // Add to Chat History sidebar (limit to top 10)
-                            if (index < 10 && chatHistoryList) {
+                            // Add to Chat History sidebar (limit to top 15 session titles)
+                            if (index < 15 && chatHistoryList) {
                                 const liHistory = document.createElement('li');
                                 liHistory.className = 'sidebar-item';
                                 liHistory.innerHTML = `
-                                    <a href="#" class="sidebar-link" style="padding: 8px 16px; font-size: 13px;">
+                                    <a href="index.html?session=${sessionMsg.session_id}" class="sidebar-link" style="padding: 8px 16px; font-size: 13px;">
                                         <span class="material-symbols-outlined" style="font-size: 16px;">forum</span>
                                         <span class="history-content-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; min-width: 0;"></span>
                                     </a>
                                 `;
-                                liHistory.querySelector('.history-content-text').textContent = msg.content;
+                                liHistory.querySelector('.history-content-text').textContent = sessionMsg.content;
                                 chatHistoryList.appendChild(liHistory);
                             }
                         });

@@ -7,11 +7,13 @@ import sys
 import uvicorn
 import logging
 from typing import Optional
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Request
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+import json
+import asyncio
 
 # ─────────────────────────────────────────────
 # PATH CONFIG
@@ -39,8 +41,11 @@ else:
 
 try:
     from backend.llm_manager import LLMManager
-except:
-    from backend.llm_manager import LLMManager
+except ImportError:
+    try:
+        from llm_manager import LLMManager
+    except ImportError:
+        LLMManager = None
 
 try:
     llm = LLMManager()
@@ -89,6 +94,8 @@ try:
 except:
     linear_algebra_solve = None
 
+print(f"📦 Engines Loaded: Algebra={algebra_solve is not None}, Calculus={calculus_solve is not None}, Geometry={geometry_solve is not None}")
+
 # ─────────────────────────────────────────────
 # FASTAPI APP
 # ─────────────────────────────────────────────
@@ -112,6 +119,7 @@ app.add_middleware(
 class QuestionRequest(BaseModel):
     question: str
     history: Optional[list] = []
+    mode: Optional[str] = "general"
 
 class HintRequest(BaseModel):
     question: str
@@ -148,7 +156,7 @@ def run_solver(fn, *args, **kwargs):
 # MAIN PIPELINE
 # ─────────────────────────────────────────────
 
-def route_and_solve(question: str, history: list = None):
+def route_and_solve(question: str, history: list = None, mode: str = "general"):
 
     if history is None:
         history = []
@@ -160,6 +168,12 @@ def route_and_solve(question: str, history: list = None):
             "success": False,
             "error": "LLM not available"
         }
+    
+    # Custom Processing for "Think" or "Steps" mode
+    if mode == "think":
+        question = f"[Think Deeply and Explain Thoroughly] {question}"
+    elif mode == "steps":
+        question = f"[Provide detailed step-by-step solution] {question}"
 
     # 1️⃣ classify
     try:
@@ -261,6 +275,15 @@ def route_and_solve(question: str, history: list = None):
     result["branch"] = branch
     result["problem_type"] = problem_type
     result["is_chat"] = False
+    result["mode"] = mode
+
+    # Ensure steps are generated if mode is 'steps' and not already present
+    if mode == "steps" and not result.get("llm_steps") and result.get("success"):
+        try:
+            steps = llm.steps(question, result.get("final_answer", ""), branch)
+            result["llm_steps"] = steps
+        except:
+            pass
 
     return result
 
@@ -270,7 +293,39 @@ def route_and_solve(question: str, history: list = None):
 
 @app.post("/solve")
 async def solve(req: QuestionRequest):
-    return route_and_solve(req.question, req.history)
+    return route_and_solve(req.question, req.history, req.mode)
+
+
+@app.post("/solve_stream")
+async def solve_stream(req: QuestionRequest):
+    """Streaming endpoint for chat-like experience."""
+    if llm is None:
+        return JSONResponse({"success": False, "error": "LLM not initialized"}, status_code=500)
+
+    # Simplified streaming flow for now
+    # We use history to maintain context
+    messages = []
+    if req.history:
+        for m in req.history:
+            # Handle both 'sender' and 'role' for compatibility
+            role = m.get('role') or ("user" if m.get("sender") == "user" else "assistant")
+            messages.append({"role": role, "content": m.get("content", "")})
+    
+    # Add current question
+    prompt = req.question
+    if req.mode == "think":
+        prompt = f"Please solve this and explain your deep thinking process: {req.question}"
+    elif req.mode == "steps":
+        prompt = f"Please provide a detailed step-by-step solution for: {req.question}"
+        
+    messages.append({"role": "user", "content": prompt})
+
+    def chunk_generator():
+        for chunk in llm.stream_chat(messages):
+            yield f"data: {json.dumps({'content': chunk})}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(chunk_generator(), media_type="text/event-stream")
 
 
 @app.post("/hints")

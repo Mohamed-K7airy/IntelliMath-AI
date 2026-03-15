@@ -15,7 +15,6 @@ Requirements:
 """
 
 import sys
-sys.stdout.reconfigure(encoding='utf-8')
 import json
 import re
 from groq import Groq
@@ -101,13 +100,45 @@ def _call_chat(messages: list, temperature: float = 0.7) -> str:
             model=GROQ_MODEL,
             messages=full_messages,
             temperature=temperature,
-            max_tokens=1024,
+            max_tokens=2048,
         )
         text = response.choices[0].message.content
         text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
         return text.strip()
     except Exception as e:
         raise RuntimeError(f"Groq API error: {e}")
+
+def stream_chat(messages: list, temperature: float = 0.7):
+    """Stream conversation history from Groq."""
+    if client is None:
+        raise RuntimeError("Groq client not initialized.")
+    
+    try:
+        full_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + messages
+        stream = client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=full_messages,
+            temperature=temperature,
+            max_tokens=2048,
+            stream=True,
+        )
+        
+        in_thinking = False
+        for chunk in stream:
+            content = chunk.choices[0].delta.content
+            if content:
+                if "<think>" in content:
+                    in_thinking = True
+                    continue
+                if "</think>" in content:
+                    in_thinking = False
+                    continue
+                
+                if not in_thinking:
+                    yield content
+                    
+    except Exception as e:
+        yield f"Error: {str(e)}"
 
 
 def _extract_json(text: str) -> dict:
@@ -537,6 +568,10 @@ class LLMManager:
     def chat_with_math(self, message: str, math_result: dict, history: list = None) -> str:
         """Wrap math solution in natural friendly response."""
         return chat_with_math(message, math_result, history)
+
+    def stream_chat(self, messages: list, temperature: float = 0.7):
+        """Stream conversation history from Groq."""
+        return stream_chat(messages, temperature)
 
 
 # ─────────────────────────────────────────────

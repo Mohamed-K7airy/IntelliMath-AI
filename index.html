@@ -72,6 +72,12 @@
                     <span class="material-symbols-outlined">dashboard</span>
                     <span class="item-text">Dashboard</span>
                 </a>
+                <!-- Temporarily hidden per user request
+                <a href="about.html" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">info</span>
+                    <span class="item-text">About Us</span>
+                </a>
+                -->
                 <a href="#" class="sidebar-nav-item">
                     <span class="material-symbols-outlined">settings</span>
                     <span class="item-text">Settings</span>
@@ -164,9 +170,35 @@
                                 <span class="material-symbols-outlined">image</span>
                             </button>
                         </div>
-                        <button class="send-btn" id="main-send-btn" title="Send Request">
-                            <span class="material-symbols-outlined send-icon">arrow_upward</span>
-                        </button>
+
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <!-- Mode Dropdown -->
+                            <div class="mode-dropdown" id="mode-dropdown">
+                                <button class="mode-dropdown-btn" id="mode-dropdown-btn">
+                                    <span class="material-symbols-outlined dropdown-icon">auto_awesome</span>
+                                    <span class="dropdown-text">General</span>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </button>
+                                <div class="mode-dropdown-menu" id="mode-dropdown-menu">
+                                    <div class="mode-option active" data-mode="general">
+                                        <span class="material-symbols-outlined">auto_awesome</span>
+                                        <span>General</span>
+                                    </div>
+                                    <div class="mode-option" data-mode="think">
+                                        <span class="material-symbols-outlined">psychology</span>
+                                        <span>Deep Think</span>
+                                    </div>
+                                    <div class="mode-option" data-mode="steps">
+                                        <span class="material-symbols-outlined">format_list_numbered</span>
+                                        <span>Steps</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="send-btn" id="main-send-btn" title="Send Request">
+                                <span class="material-symbols-outlined send-icon">arrow_upward</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="chat-disclaimer">Sphinx-SCA BETA can make mistakes. Always verify important calculations.
@@ -301,6 +333,43 @@
             }
 
             const { data: { session } } = await supabase.auth.getSession();
+            let currentMode = 'general';
+
+            // Handle Mode Dropdown
+            const modeDropdownBtn = document.getElementById('mode-dropdown-btn');
+            const modeDropdownMenu = document.getElementById('mode-dropdown-menu');
+            const modeOptions = document.querySelectorAll('.mode-option');
+
+            if (modeDropdownBtn && modeDropdownMenu) {
+                modeDropdownBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    modeDropdownMenu.classList.toggle('active');
+                });
+
+                document.addEventListener('click', () => {
+                    modeDropdownMenu.classList.remove('active');
+                });
+
+                modeOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        const mode = option.dataset.mode;
+                        const text = option.querySelector('span:last-child').textContent;
+                        const icon = option.querySelector('.material-symbols-outlined').textContent;
+
+                        currentMode = mode;
+
+                        // Update button text and icon
+                        modeDropdownBtn.querySelector('.dropdown-text').textContent = text;
+                        modeDropdownBtn.querySelector('.dropdown-icon').textContent = icon;
+
+                        // Update active state
+                        modeOptions.forEach(o => o.classList.remove('active'));
+                        option.classList.add('active');
+
+                        modeDropdownMenu.classList.remove('active');
+                    });
+                });
+            }
 
             let currentUserId = null;
             let currentSessionId = generateUUID(); // Start a new session by default
@@ -465,10 +534,27 @@
             }
             searchInput.addEventListener('input', () => autoResize(searchInput));
 
+            // --- Professional Markdown-lite Formatter ---
+            function formatMessage(text) {
+                if (!text) return "";
+                // Basic bold
+                text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                // Basic italic
+                text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                // Inline code
+                text = text.replace(/`(.*?)`/g, '<code class="inline-code">$1</code>');
+                // Block code (simplified)
+                text = text.replace(/```([\s\S]*?)```/g, '<pre class="code-block"><code>$1</code></pre>');
+                // Line breaks
+                text = text.replace(/\n/g, '<br>');
+                return text;
+            }
+
             // Function to add a message bubble
-            function addMessage(text, sender, userName = 'User') {
+            function addMessage(text, sender, userName = 'User', isError = false) {
                 const msgDiv = document.createElement('div');
                 msgDiv.classList.add('message', `${sender}-message`);
+                if (isError) msgDiv.classList.add('error-message');
 
                 if (sender === 'ai') {
                     msgDiv.innerHTML = `
@@ -476,13 +562,14 @@
                             <img src="logo.png" alt="AI">
                         </div>
                         <div class="message-content">
-                            <p>${text}</p>
+                            <div class="ai-name">Sphinx-SCA</div>
+                            <div class="text-body">${text}</div>
                         </div>
                     `;
                 } else {
                     msgDiv.innerHTML = `
                         <div class="message-content">
-                            <p>${text}</p>
+                            <div class="text-body">${text}</div>
                         </div>
                         <div class="message-avatar">
                             <img src="user.png" alt="${userName}">
@@ -491,93 +578,145 @@
                 }
 
                 chatMessages.appendChild(msgDiv);
+                
                 // Auto-scroll the chat
                 const scrollWrapper = document.getElementById('chat-interface');
                 scrollWrapper.scrollTop = scrollWrapper.scrollHeight;
+
+                // Apply initial formatting if text is present
+                if (text && sender === 'ai') {
+                    const body = msgDiv.querySelector('.text-body');
+                    if (body) body.innerHTML = formatMessage(text);
+                } else if (text && sender === 'user') {
+                    const body = msgDiv.querySelector('.text-body');
+                    if (body) body.textContent = text; // User text doesn't need markdown-lite
+                }
+
+                return msgDiv;
             }
 
             async function handleSend() {
                 const msg = searchInput.value;
                 if (!msg.trim()) return;
 
-                // 1. Show message in UI
+                // 1. Add User Message immediately to ensure correct chronology
+                addMessage(msg, 'user');
+                await saveMessageToSupabase(msg, 'user');
+
                 if (!isChatActive) {
                     isChatActive = true;
                     heroSection.classList.add('animate-out');
-                    setTimeout(async () => {
-                        heroSection.style.display = 'none';
-                        chatInterface.style.display = 'flex';
-                        addMessage(msg, 'user');
-                        await saveMessageToSupabase(msg, 'user'); // Save user message
-                    }, 400);
-                } else {
-                    addMessage(msg, 'user');
-                    await saveMessageToSupabase(msg, 'user'); // Save user message
+                    // Small delay for animation before layout switch
+                    await new Promise(resolve => setTimeout(resolve, 400));
+                    heroSection.style.display = 'none';
+                    chatInterface.style.display = 'flex';
                 }
 
                 searchInput.value = '';
                 autoResize(searchInput);
 
-                // 2. Connect to Backend
-                try {
-                    // The backend is ALWAYS on Railway, regardless of where the frontend is hosted
-                    // (Vercel, locally, or Railway itself)
-                    const API_URL = "https://sphinx-gpt-beta-production.up.railway.app";
 
-                    // Disable button during request
+                // 2. Connect to Backend (Smart Fallback)
+                try {
+                    const origin = window.location.origin;
+                    let API_URL = "https://sphinx-gpt-beta-production.up.railway.app"; // Default to production
+                    
+                    // If on localhost, try local first
+                    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+                        try {
+                            const testLocal = await fetch("http://localhost:8000/health", { mode: 'no-cors' });
+                            API_URL = "http://localhost:8000";
+                        } catch (e) {
+                            console.log("Local backend not found, using production fallback.");
+                        }
+                    }
+
                     const sendBtnIcon = sendBtn.querySelector('.send-icon');
                     sendBtn.disabled = true;
-                    sendBtnIcon.textContent = 'pending'; // visually indicate loading
+                    sendBtnIcon.textContent = 'pending';
 
-                    // Build history array from current loaded messages
+                    // Build history
                     const historyForBackend = [];
                     const messageElements = chatMessages.querySelectorAll('.message');
-                    // Add all messages EXCEPT the very last one we just added (the current question)
                     for (let i = 0; i < messageElements.length - 1; i++) {
                         const el = messageElements[i];
                         const isUser = el.classList.contains('user-message');
-                        const text = el.querySelector('p').textContent;
-                        historyForBackend.push({
-                            role: isUser ? "user" : "assistant",
-                            content: text
-                        });
+                        const p = el.querySelector('p');
+                        if (p) {
+                            historyForBackend.push({
+                                role: isUser ? "user" : "assistant",
+                                content: p.textContent
+                            });
+                        }
                     }
 
-                    const response = await fetch(`${API_URL}/solve`, {
+                    // Create AI message placeholder
+                    const aiMsgDiv = addMessage("", 'ai');
+                    const aiTextDiv = aiMsgDiv.querySelector('.text-body');
+                    let fullAiResponse = "";
+
+                    const response = await fetch(`${API_URL}/solve_stream`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             question: msg,
                             user_id: currentUserId,
-                            history: historyForBackend
+                            history: historyForBackend,
+                            mode: currentMode
                         })
                     });
+
+                    if (!response.ok) throw new Error(`Server Error: ${response.status}`);
+
+                    // Read the stream
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+
+                        for (let line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const dataStr = line.replace('data: ', '').trim();
+                                if (dataStr === '[DONE]') break;
+                                
+                                try {
+                                    const data = JSON.parse(dataStr);
+                                    if (data.content) {
+                                        fullAiResponse += data.content;
+                                        aiTextDiv.innerHTML = formatMessage(fullAiResponse); // Use innerHTML for markdown-lite
+                                        
+                                        // Auto-scroll while streaming
+                                        const scrollWrapper = document.getElementById('chat-interface');
+                                        scrollWrapper.scrollTop = scrollWrapper.scrollHeight;
+                                    }
+                                } catch (e) {
+                                    console.warn("Error parsing stream chunk", e);
+                                }
+                            }
+                        }
+                    }
 
                     // Re-enable button
                     sendBtn.disabled = false;
                     sendBtnIcon.textContent = 'arrow_upward';
 
-                    if (!response.ok) {
-                        throw new Error(`Server Error (${response.status}): ${response.statusText}`);
+                    // Save final response and update dashboard
+                    if (fullAiResponse) {
+                        await saveMessageToSupabase(fullAiResponse, 'ai');
+                        if (currentUserId) fetchUserData(currentUserId);
                     }
 
-                    const result = await response.json();
-                    if (result.success) {
-                        const aiResponse = result.final_answer || result.answer || "No response content.";
-                        addMessage(aiResponse, 'ai');
-                        await saveMessageToSupabase(aiResponse, 'ai');
-                        if (currentUserId) fetchUserData(currentUserId);
-                    } else {
-                        addMessage(`⚠️ App Error: ${result.error || "Unknown issue"}`, 'ai');
-                    }
                 } catch (error) {
-                    console.error("Fetch error details:", error);
-                    // Reset button on error
+                    console.error("Streaming error:", error);
                     sendBtn.disabled = false;
                     const sendBtnIcon = sendBtn.querySelector('.send-icon');
                     sendBtnIcon.textContent = 'arrow_upward';
-
-                    addMessage(`❌ Connection Failed: ${error.message}. Please check if the backend is awake.`, 'ai');
+                    addMessage(`❌ Connection Failed: ${error.message}`, 'ai');
                 }
             }
             // Event Listeners for Unified Search

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Sphinx-SCA</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Theme Initialization -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark-theme');
+            }
+        })();
+    </script>
+
+    <!-- Material Icons -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="app-page">
+    <div class="app-layout">
+        <!-- Main Sidebar -->
+        <aside class="main-sidebar collapsed" id="main-sidebar">
+            <div class="sidebar-top">
+                <button class="menu-toggle-btn" id="sidebar-toggle-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </div>
+
+            <div class="sidebar-action">
+                <button class="new-chat-sidebar-btn" onclick="window.location.href='index.html';">
+                    <span class="material-symbols-outlined">add</span>
+                    <span class="btn-text">New chat</span>
+                </button>
+            </div>
+
+            <div class="sidebar-scrollable">
+                <div class="sidebar-section hover-expand">
+                    <div class="section-header">
+                        <span class="material-symbols-outlined section-icon">history</span>
+                        <span class="section-title">Recent</span>
+                    </div>
+                    <ul class="sidebar-history-list" id="sidebar-history-list">
+                    </ul>
+                </div>
+            </div>
+
+            <div class="sidebar-bottom">
+                <a href="index.html" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="item-text">Home</span>
+                </a>
+                <a href="dashboard.html" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="item-text">Dashboard</span>
+                </a>
+                <a href="about.html" class="sidebar-nav-item active">
+                    <span class="material-symbols-outlined">info</span>
+                    <span class="item-text">About</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile sidebar -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Main Content Area -->
+        <div class="main-content-wrapper">
+            <header class="header">
+                <button class="mobile-left-menu-btn" id="mobile-left-menu-btn" style="display: none;">
+                    <span class="material-symbols-outlined" style="font-size: 28px;">menu</span>
+                </button>
+                <div class="logo-container" onclick="window.location.href='index.html'">
+                    <img src="logo.png" alt="Sphinx-SCA Logo" class="logo-icon">
+                    <div class="logo-text">
+                        <span class="logo-sphinx">Sphinx</span><span class="logo-sca">-SCA</span><span
+                            style="font-size: 14px; font-weight: 800; color: var(--bg-orange); margin-left: 6px; vertical-align: middle;">BETA</span>
+                    </div>
+                </div>
+
+                <nav class="nav">
+                    <button class="nav-theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                        <span class="material-symbols-outlined theme-icon">dark_mode</span>
+                    </button>
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="about.html" class="nav-link" style="color: var(--bg-orange)">About Us</a>
+                    <a href="login.html" class="nav-link" id="nav-login-btn">log in</a>
+
+                    <div class="profile-container" id="nav-profile-container">
+                        <div class="nav-profile" id="nav-user-avatar" title="Your Account"></div>
+                        <div class="profile-dropdown">
+                            <a href="dashboard.html" class="dropdown-item">
+                                <span class="material-symbols-outlined">person</span>
+                                Profile
+                            </a>
+                            <a href="#" class="dropdown-item logout" id="logout-btn">
+                                <span class="material-symbols-outlined">logout</span>
+                                Log Out
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+            </header>
+
+            <main class="scrollable-content" style="flex: 1; overflow-y: auto;">
+                <section class="about-hero">
+                    <h1 class="about-title">MEET OUR TEAM</h1>
+                    <div class="pharaonic-line">
+                        <div class="diamond"></div>
+                        <div class="line"></div>
+                        <div class="diamond center"></div>
+                        <div class="line"></div>
+                        <div class="diamond"></div>
+                    </div>
+                </section>
+
+                <!-- AI Team Section -->
+                <section class="department-section">
+                    <h2 class="section-subtitle">AI TEAM</h2>
+                    <div class="pharaonic-line mini">
+                        <div class="diamond"></div>
+                        <div class="line"></div>
+                        <div class="diamond center"></div>
+                        <div class="line"></div>
+                        <div class="diamond"></div>
+                    </div>
+                    <div class="team-grid">
+                        <!-- AI Member 1 -->
+                        <div class="portfolio-card">
+                            <div class="card-info">
+                                <h2 class="member-name">Sara Hassan</h2>
+                                <span class="member-role">AI Specialist</span>
+                                <p class="member-bio">Passionate about machine learning and mathematical modeling. Sara
+                                    ensures our solver stays ahead of the curve.</p>
+                                <div class="member-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value">30+</span>
+                                        <span class="stat-label">AI Models</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">5+</span>
+                                        <span class="stat-label">Years Exp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="id-badge-container">
+                                <div class="lanyard-assembly">
+                                    <div class="lanyard-strap"></div>
+                                    <div class="lanyard-clip"></div>
+                                    <div class="id-badge">
+                                        <div class="badge-hole"></div>
+                                        <img src="/public/team/member2.png" alt="Sara Hassan" class="badge-img">
+                                        <span class="badge-tag">AI / ML</span>
+                                        <span class="badge-sub">Specialist</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Member 2 -->
+                        <div class="portfolio-card">
+                            <div class="card-info">
+                                <h2 class="member-name">Mostafa Ali</h2>
+                                <span class="member-role">Data Scientist</span>
+                                <p class="member-bio">Analyzing data trends to optimize our AI performance. Mostafa
+                                    turns complex data into actionable insights.</p>
+                                <div class="member-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value">15+</span>
+                                        <span class="stat-label">Big Data</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">4+</span>
+                                        <span class="stat-label">Years Exp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="id-badge-container">
+                                <div class="lanyard-assembly">
+                                    <div class="lanyard-strap"></div>
+                                    <div class="lanyard-clip"></div>
+                                    <div class="id-badge">
+                                        <div class="badge-hole"></div>
+                                        <img src="/public/team/member5.png" alt="Mostafa Ali" class="badge-img">
+                                        <span class="badge-tag">DATA SCIENCE</span>
+                                        <span class="badge-sub">Scientist</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Member 3 -->
+                        <div class="portfolio-card">
+                            <div class="card-info">
+                                <h2 class="member-name">Ziad Amr</h2>
+                                <span class="member-role">ML Engineer</span>
+                                <p class="member-bio">Expert in training large language models and optimizing neural
+                                    networks for real-time mathematical solving.</p>
+                                <div class="member-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value">25+</span>
+                                        <span class="stat-label">LLM Tasks</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">3+</span>
+                                        <span class="stat-label">Years Exp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="id-badge-container">
+                                <div class="lanyard-assembly">
+                                    <div class="lanyard-strap"></div>
+                                    <div class="lanyard-clip"></div>
+                                    <div class="id-badge">
+                                        <div class="badge-hole"></div>
+                                        <img src="/public/team/member3.png" alt="Ziad Amr" class="badge-img">
+                                        <span class="badge-tag">ENGINEERING</span>
+                                        <span class="badge-sub">ML Engineer</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Member 4 -->
+                        <div class="portfolio-card">
+                            <div class="card-info">
+                                <h2 class="member-name">Dina Fouad</h2>
+                                <span class="member-role">AI Researcher</span>
+                                <p class="member-bio">Conducting cutting-edge research in automated reasoning and
+                                    symbolic mathematics to empower Sphinx-SCA.</p>
+                                <div class="member-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value">10+</span>
+                                        <span class="stat-label">Papers</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">2+</span>
+                                        <span class="stat-label">Years Exp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="id-badge-container">
+                                <div class="lanyard-assembly">
+                                    <div class="lanyard-strap"></div>
+                                    <div class="lanyard-clip"></div>
+                                    <div class="id-badge">
+                                        <div class="badge-hole"></div>
+                                        <img src="/public/team/member4.png" alt="Dina Fouad" class="badge-img">
+                                        <span class="badge-tag">RESEARCH</span>
+                                        <span class="badge-sub">Researcher</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Backend Team Section -->
+                <section class="department-section">
+                    <h2 class="section-subtitle">BACKEND TEAM</h2>
+                    <div class="pharaonic-line mini">
+                        <div class="diamond"></div>
+                        <div class="line"></div>
+                        <div class="diamond center"></div>
+                        <div class="line"></div>
+                        <div class="diamond"></div>
+                    </div>
+                    <div class="team-grid">
+                        <!-- Backend Member 1 -->
+                        <div class="portfolio-card">
+                            <div class="card-info">
+                                <h2 class="member-name">Ahmed Samy</h2>
+                                <span class="member-role">Lead Backend</span>
+                                <p class="member-bio">Expert in API architecture and system integration. Ahmed leads the
+                                    core infrastructure development.</p>
+                                <div class="member-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value">50+</span>
+                                        <span class="stat-label">Projects</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">8+</span>
+                                        <span class="stat-label">Years Exp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="id-badge-container">
+                                <div class="lanyard-assembly">
+                                    <div class="lanyard-strap"></div>
+                                    <div class="lanyard-clip"></div>
+                                    <div class="id-badge">
+                                        <div class="badge-hole"></div>
+                                        <img src="/public/team/member1.png" alt="Ahmed Samy" class="badge-img">
+                                        <span class="badge-tag">LEAD DEV</span>
+                                        <span class="badge-sub">Backend</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Backend Member 2 -->
+                        <div class="portfolio-card">
+                            <div class="card-info">
+                                <h2 class="member-name">Youssef Zaki</h2>
+                                <span class="member-role">Backend Engineer</span>
+                                <p class="member-bio">Building robust and scalable server architectures. Youssef handles
+                                    our database and API security.</p>
+                                <div class="member-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value">20+</span>
+                                        <span class="stat-label">Systems</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">6+</span>
+                                        <span class="stat-label">Years Exp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="id-badge-container">
+                                <div class="lanyard-assembly">
+                                    <div class="lanyard-strap"></div>
+                                    <div class="lanyard-clip"></div>
+                                    <div class="id-badge">
+                                        <div class="badge-hole"></div>
+                                        <img src="/public/team/member7.png" alt="Youssef Zaki" class="badge-img">
+                                        <span class="badge-tag">SYSTEMS</span>
+                                        <span class="badge-sub">Backend</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Backend Member 3 -->
+                        <div class="portfolio-card">
+                            <div class="card-info">
+                                <h2 class="member-name">Karim Adel</h2>
+                                <span class="member-role">Infrastructure</span>
+                                <p class="member-bio">Ensuring 99.9% uptime and high-speed delivery. Karim manages our
+                                    cloud clusters and CI/CD pipelines.</p>
+                                <div class="member-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value">15+</span>
+                                        <span class="stat-label">Clusters</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">5+</span>
+                                        <span class="stat-label">Years Exp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="id-badge-container">
+                                <div class="lanyard-assembly">
+                                    <div class="lanyard-strap"></div>
+                                    <div class="lanyard-clip"></div>
+                                    <div class="id-badge">
+                                        <div class="badge-hole"></div>
+                                        <img src="/public/team/member8.png" alt="Karim Adel" class="badge-img">
+                                        <span class="badge-tag">DEVOPS</span>
+                                        <span class="badge-sub">Infrastructure</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Frontend Section -->
+                <section class="department-section">
+                    <h2 class="section-subtitle">FRONTEND</h2>
+                    <div class="pharaonic-line mini">
+                        <div class="diamond"></div>
+                        <div class="line"></div>
+                        <div class="diamond center"></div>
+                        <div class="line"></div>
+                        <div class="diamond"></div>
+                    </div>
+                    <div class="team-grid">
+                        <!-- Frontend Member 1 -->
+                        <div class="portfolio-card" style="max-width: 500px; margin: 0 auto;">
+                            <div class="card-info">
+                                <h2 class="member-name">Mohamed Khairy</h2>
+                                <span class="member-role">Frontend Dev (Vibe Coding)</span>
+                                <p class="member-bio">Expert in building pixel-perfect, responsive interfaces. Mohamed
+                                    creates the stunning visuals you see on Sphinx-SCA.</p>
+                                <div class="member-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value">5+</span>
+                                        <span class="stat-label">UI Kits</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">2+</span>
+                                        <span class="stat-label">Years Exp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="id-badge-container">
+                                <div class="lanyard-assembly">
+                                    <div class="lanyard-strap"></div>
+                                    <div class="lanyard-clip"></div>
+                                    <div class="id-badge">
+                                        <div class="badge-hole"></div>
+                                        <img src="/public/team/member6.png" alt="Mohamed Khairy" class="badge-img">
+                                        <span class="badge-tag">WEB ARTIST</span>
+                                        <span class="badge-sub">Frontend</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5); font-size: 13px;">
+                    &copy; 2026 Sphinx-SCA. All rights reserved.
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { supabase } from './supabaseClient.js';
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Sidebar Logic
+            const mainSidebar = document.getElementById('main-sidebar');
+            const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const mobileLeftMenuBtn = document.getElementById('mobile-left-menu-btn');
+
+            if (sidebarToggleBtn) {
+                sidebarToggleBtn.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        mainSidebar.classList.remove('mobile-open');
+                        sidebarOverlay.classList.remove('active');
+                    } else {
+                        mainSidebar.classList.toggle('collapsed');
+                    }
+                });
+            }
+
+            if (mobileLeftMenuBtn) {
+                mobileLeftMenuBtn.addEventListener('click', () => {
+                    mainSidebar.classList.add('mobile-open');
+                    sidebarOverlay.classList.add('active');
+                });
+            }
+
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', () => {
+                    mainSidebar.classList.remove('mobile-open');
+                    sidebarOverlay.classList.remove('active');
+                });
+            }
+
+            // Auth Logic
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                document.getElementById('nav-login-btn').style.display = 'none';
+                const avatar = document.getElementById('nav-user-avatar');
+                avatar.innerHTML = `<img src="user.png" alt="User" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                document.getElementById('nav-profile-container').style.display = 'block';
+
+                document.getElementById('logout-btn').addEventListener('click', async () => {
+                    await supabase.auth.signOut();
+                    window.location.reload();
+                });
+            }
+
+            // Theme Toggle
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            themeToggleBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark-theme');
+                document.body.classList.toggle('dark-theme');
+                const isDark = document.body.classList.contains('dark-theme');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                const icon = themeToggleBtn.querySelector('.theme-icon');
+                icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+            });
+        });
+    </script>
+</body>
+
+</html>
