@@ -7,7 +7,11 @@ import sys
 import uvicorn
 import logging
 from typing import Optional
-from fastapi import FastAPI, UploadFile, File, Request
+from dotenv import load_dotenv
+
+# Load .env file at the very beginning
+load_dotenv()
+from fastapi import FastAPI, UploadFile, File, Request, Response
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
@@ -22,7 +26,9 @@ import asyncio
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
+# Add PROJECT_ROOT and the math_engine folder to sys.path
 sys.path.append(PROJECT_ROOT)
+sys.path.append(os.path.join(PROJECT_ROOT, "math_engine", "math_engine"))
 
 # ─────────────────────────────────────────────
 # ENVIRONMENT
@@ -47,12 +53,16 @@ except ImportError:
     except ImportError:
         LLMManager = None
 
-try:
-    llm = LLMManager()
-    print("✅ LLM Manager loaded")
-except Exception as e:
+if LLMManager:
+    try:
+        llm = LLMManager()
+        print("✅ LLM Manager loaded")
+    except Exception as e:
+        llm = None
+        print("⚠️ LLM Manager failed:", e)
+else:
     llm = None
-    print("⚠️ LLM Manager failed:", e)
+    print("⚠️ LLM Manager class could not be imported")
 
 # ─────────────────────────────────────────────
 # LOGGING
@@ -67,32 +77,42 @@ logger = logging.getLogger("sphinx")
 
 try:
     from algebra.algebra_engine import solve as algebra_solve
-except:
+    print("✅ Algebra engine loaded")
+except Exception as e:
     algebra_solve = None
+    print(f"⚠️ Algebra engine failed: {e}")
 
 try:
     import calculus
     calculus_solve = calculus.solve
-except:
+    print("✅ Calculus engine loaded")
+except Exception as e:
     calculus_solve = None
+    print(f"⚠️ Calculus engine failed: {e}")
 
 try:
     import geometry
     geometry_solve = geometry.solve
-except:
+    print("✅ Geometry engine loaded")
+except Exception as e:
     geometry_solve = None
+    print(f"⚠️ Geometry engine failed: {e}")
 
 try:
     import statistics_engine
     statistics_solve = statistics_engine.solve
-except:
+    print("✅ Statistics engine loaded")
+except Exception as e:
     statistics_solve = None
+    print(f"⚠️ Statistics engine failed: {e}")
 
 try:
     import linear_algebra
     linear_algebra_solve = linear_algebra.solve
-except:
+    print("✅ Linear algebra engine loaded")
+except Exception as e:
     linear_algebra_solve = None
+    print(f"⚠️ Linear algebra engine failed: {e}")
 
 print(f"📦 Engines Loaded: Algebra={algebra_solve is not None}, Calculus={calculus_solve is not None}, Geometry={geometry_solve is not None}")
 
@@ -100,14 +120,52 @@ print(f"📦 Engines Loaded: Algebra={algebra_solve is not None}, Calculus={calc
 # FASTAPI APP
 # ─────────────────────────────────────────────
 
+# ✅ FIX: Restrict CORS to known origins instead of wildcard
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "https://sphinx-gpt-beta-production.up.railway.app").split(",")
+ALLOWED_ORIGINS = [o.strip() for o in _raw_origins if o.strip()]
+
+# Auto-add local dev origins if not present
+LOCAL_DEFAULTS = ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174", "http://localhost:8000", "http://127.0.0.1:8000"]
+for origin in LOCAL_DEFAULTS:
+    if origin not in ALLOWED_ORIGINS:
+        ALLOWED_ORIGINS.append(origin)
+
 app = FastAPI(
     title="Sphinx-SCA API",
     version="3.0"
 )
 
+# Simple In-Memory Rate Limiter (Token Bucket per IP)
+import time
+from fastapi import HTTPException
+from collections import defaultdict
+
+RATE_LIMIT_REQUESTS = 60
+RATE_LIMIT_WINDOW_SECONDS = 60
+ip_requests = defaultdict(list)
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Skip rate limiting for OPTIONS preflight requests
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    
+    # Clean up old requests
+    ip_requests[client_ip] = [req_time for req_time in ip_requests[client_ip] if now - req_time < RATE_LIMIT_WINDOW_SECONDS]
+    
+    if len(ip_requests[client_ip]) >= RATE_LIMIT_REQUESTS:
+        return JSONResponse(status_code=429, content={"detail": "Too Many Requests"})
+        
+    ip_requests[client_ip].append(now)
+    return await call_next(request)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], # Allow all origins for the Beta phase to handle custom domains like chat.sphinxcs.online
+    allow_credentials=False, # Must be False when allow_origins is ["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -147,6 +205,8 @@ def run_solver(fn, *args, **kwargs):
         }
 
     except Exception as e:
+        # ✅ FIX: Log the actual error instead of swallowing it silently
+        logger.error("Solver error in %s: %s", fn.__name__ if hasattr(fn, '__name__') else str(fn), e, exc_info=True)
         return {
             "success": False,
             "error": str(e)
@@ -181,7 +241,8 @@ def route_and_solve(question: str, history: list = None, mode: str = "general"):
         branch = c.get("branch", "algebra")
         problem_type = c.get("problem_type", "solve")
         is_math = c.get("is_math", True)
-    except:
+    except Exception as e:
+        logger.warning("Classification failed, defaulting to algebra: %s", e)
         branch = "algebra"
         problem_type = "solve"
         is_math = True
@@ -201,6 +262,7 @@ def route_and_solve(question: str, history: list = None, mode: str = "general"):
             }
 
         except Exception as e:
+            logger.error("Chat error: %s", e, exc_info=True)
             return {
                 "success": False,
                 "error": str(e)
@@ -209,7 +271,8 @@ def route_and_solve(question: str, history: list = None, mode: str = "general"):
     # 3️⃣ parse
     try:
         parsed = llm.parse(question, branch)
-    except:
+    except Exception as e:
+        logger.warning("Parse failed: %s", e)
         parsed = {}
 
     # 4️⃣ solve
@@ -246,17 +309,18 @@ def route_and_solve(question: str, history: list = None, mode: str = "general"):
 
     # 5️⃣ fallback to LLM
     if not result.get("success"):
-
-        try:
-            wp = llm.word_problem(question)
-
-            result = {
-                "success": True,
-                "final_answer": wp.get("answer_sentence")
-            }
-
-        except:
-            pass
+        if branch == "word_problem":
+            try:
+                wp = llm.word_problem(question)
+                result = {
+                    "success": True,
+                    "final_answer": wp.get("answer_sentence")
+                }
+            except Exception as e:
+                logger.error("Word problem fallback failed: %s", e, exc_info=True)
+                result["error"] = str(e)
+        else:
+            result = {"success": False, "error": "Math engine failed to solve the problem."}
 
     # 6️⃣ steps
     if result.get("success"):
@@ -267,7 +331,8 @@ def route_and_solve(question: str, history: list = None, mode: str = "general"):
                 result.get("final_answer", ""),
                 branch
             )
-        except:
+        except Exception as e:
+            logger.warning("Steps generation failed: %s", e)
             steps = []
 
         result["llm_steps"] = steps
@@ -282,8 +347,8 @@ def route_and_solve(question: str, history: list = None, mode: str = "general"):
         try:
             steps = llm.steps(question, result.get("final_answer", ""), branch)
             result["llm_steps"] = steps
-        except:
-            pass
+        except Exception as e:
+            logger.warning("Steps (mode=steps) generation failed: %s", e)
 
     return result
 
@@ -302,14 +367,14 @@ async def solve_stream(req: QuestionRequest):
     if llm is None:
         return JSONResponse({"success": False, "error": "LLM not initialized"}, status_code=500)
 
-    # Simplified streaming flow for now
-    # We use history to maintain context
     messages = []
     if req.history:
         for m in req.history:
             # Handle both 'sender' and 'role' for compatibility
             role = m.get('role') or ("user" if m.get("sender") == "user" else "assistant")
-            messages.append({"role": role, "content": m.get("content", "")})
+            content = m.get("content", "")
+            if role and content:
+                messages.append({"role": role, "content": content})
     
     # Add current question
     prompt = req.question
@@ -320,10 +385,17 @@ async def solve_stream(req: QuestionRequest):
         
     messages.append({"role": "user", "content": prompt})
 
-    def chunk_generator():
-        for chunk in llm.stream_chat(messages):
-            yield f"data: {json.dumps({'content': chunk})}\n\n"
-        yield "data: [DONE]\n\n"
+    async def chunk_generator():
+        try:
+            for chunk in llm.stream_chat(messages):
+                yield f"data: {json.dumps({'content': chunk})}\n\n"
+        except asyncio.CancelledError:
+            logger.info("Client disconnected during stream")
+        except Exception as e:
+            logger.error("Streaming error: %s", e, exc_info=True)
+            yield f"data: {json.dumps({'error': 'Stream interrupted'})}\n\n"
+        finally:
+            yield "data: [DONE]\n\n"
 
     return StreamingResponse(chunk_generator(), media_type="text/event-stream")
 
@@ -343,6 +415,7 @@ async def hints(req: HintRequest):
         }
 
     except Exception as e:
+        logger.error("Hints error: %s", e, exc_info=True)
         return {
             "success": False,
             "error": str(e)
@@ -353,11 +426,22 @@ async def hints(req: HintRequest):
 # ─────────────────────────────────────────────
 
 @app.get("/health")
-async def health():
+async def health(response: Response):
+
+    is_healthy = llm is not None and (algebra_solve is not None)
+    if not is_healthy:
+        response.status_code = 503
 
     return {
-        "status": "ok",
-        "llm_loaded": llm is not None
+        "status": "ok" if is_healthy else "degraded",
+        "llm_loaded": llm is not None,
+        "engines": {
+            "algebra": algebra_solve is not None,
+            "calculus": calculus_solve is not None,
+            "geometry": geometry_solve is not None,
+            "statistics": statistics_solve is not None,
+            "linear_algebra": linear_algebra_solve is not None,
+        }
     }
 
 # ─────────────────────────────────────────────
@@ -366,45 +450,30 @@ async def health():
 
 FRONTEND_DIR = PROJECT_ROOT
 
+ALLOWED_FILES = [
+    "index.html", 
+    "dashboard.html", 
+    "login.html", 
+    "signup.html", 
+    "about.html", 
+    "style.css", 
+    "logo.png", 
+    "user.png", 
+    "bg.jpg", 
+    "supabaseClient.js"
+]
+
 @app.get("/")
 async def home():
     return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
 
-@app.get("/index.html")
-async def index():
-    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
-
-@app.get("/dashboard.html")
-async def dashboard():
-    return FileResponse(os.path.join(FRONTEND_DIR, "dashboard.html"))
-
-@app.get("/login.html")
-async def login():
-    return FileResponse(os.path.join(FRONTEND_DIR, "login.html"))
-
-@app.get("/signup.html")
-async def signup():
-    return FileResponse(os.path.join(FRONTEND_DIR, "signup.html"))
-
-@app.get("/style.css")
-async def style():
-    return FileResponse(os.path.join(FRONTEND_DIR, "style.css"))
-
-@app.get("/logo.png")
-async def logo():
-    return FileResponse(os.path.join(FRONTEND_DIR, "logo.png"))
-
-@app.get("/user.png")
-async def user_img():
-    return FileResponse(os.path.join(FRONTEND_DIR, "user.png"))
-
-@app.get("/bg.jpg")
-async def bg():
-    return FileResponse(os.path.join(FRONTEND_DIR, "bg.jpg"))
-
-@app.get("/supabaseClient.js")
-async def supabase_client():
-    return FileResponse(os.path.join(FRONTEND_DIR, "supabaseClient.js"))
+@app.get("/{filename}")
+async def serve_static(filename: str):
+    if filename in ALLOWED_FILES:
+        return FileResponse(os.path.join(FRONTEND_DIR, filename))
+    # For subdirectories like src/ or public/assets/ if requested dynamically, 
+    # though usually they are built into dist. We return 404 for unauthorized root files.
+    return JSONResponse({"error": "File not found"}, status_code=404)
 
 # ─────────────────────────────────────────────
 # RUN SERVER

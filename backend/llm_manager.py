@@ -25,8 +25,10 @@ import os
 #  CONFIG
 # ─────────────────────────────────────────────
 
+from dotenv import load_dotenv
+load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = "moonshotai/kimi-k2-instruct"
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 # We initialize the client only if the API KEY is present.
 # This prevents a crash during module import on platforms like Railway
@@ -34,7 +36,7 @@ GROQ_MODEL = "moonshotai/kimi-k2-instruct"
 client = None
 if GROQ_API_KEY:
     try:
-        client = Groq(api_key=GROQ_API_KEY)
+        client = Groq(api_key=GROQ_API_KEY, timeout=60.0)
     except Exception as e:
         print(f"⚠️ Failed to initialize Groq client: {e}")
 else:
@@ -81,7 +83,7 @@ def _call_llm(prompt: str, temperature: float = 0.0) -> str:
             model=GROQ_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=temperature,
-            max_tokens=1024,
+            max_tokens=4096,
         )
         text = response.choices[0].message.content
         text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
@@ -100,7 +102,7 @@ def _call_chat(messages: list, temperature: float = 0.7) -> str:
             model=GROQ_MODEL,
             messages=full_messages,
             temperature=temperature,
-            max_tokens=2048,
+            max_tokens=4096,
         )
         text = response.choices[0].message.content
         text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
@@ -119,13 +121,16 @@ def stream_chat(messages: list, temperature: float = 0.7):
             model=GROQ_MODEL,
             messages=full_messages,
             temperature=temperature,
-            max_tokens=2048,
+            max_tokens=4096,
             stream=True,
         )
         
         in_thinking = False
         for chunk in stream:
-            content = chunk.choices[0].delta.content
+            if not chunk.choices:
+                continue
+            delta = chunk.choices[0].delta
+            content = getattr(delta, 'content', None)
             if content:
                 if "<think>" in content:
                     in_thinking = True
@@ -518,9 +523,10 @@ def chat_with_math(message: str, math_result: dict, history: list = None) -> str
             for i, s in enumerate(steps)
         )
 
+    steps_text_block = f"Steps found:\n{steps_text}" if steps_text else ""
     context = f"""The user asked: "{message}"
 The math solver found the answer: {answer}
-{"Steps found:\n" + steps_text if steps_text else ""}
+{steps_text_block}
 
 Now respond as Sphinx-SCA naturally. Present the answer warmly with the steps. Encourage the user."""
 

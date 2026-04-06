@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Sphinx-SCA BETA</title>
+    <title>Dashboard | Sphinx-SCA</title>
+    <meta name="description" content="Your personal Sphinx-SCA dashboard — track your solved problems, view activity, and manage your AI math assistant.">
     <link rel="icon" type="image/png" href="/logo.png">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Theme Initialization Script (Before render) -->
     <script>
@@ -28,82 +29,77 @@
 
     <link rel="stylesheet" href="style.css">
     <style>
-        body.dashboard-page {
-            /* Reset body background for dashboard since it's an interior page */
-            background: #FFFFFF !important;
-        }
-
+        /* Dashboard Layout */
         .dashboard-layout {
             display: flex;
-            min-height: calc(100vh - 85px);
-            /* Subtract header height */
+            min-height: calc(100vh - var(--header-height));
             width: 100%;
         }
 
-        /* Sidebar Styling */
+        /* Dashboard Sidebar */
         .sidebar {
-            width: 280px;
-            background-color: var(--text-white);
-            border-right: 1px solid #E5E7EB;
-            padding: 30px 0;
+            width: 260px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: var(--space-6) 0;
             display: flex;
             flex-direction: column;
             position: sticky;
-            top: 80px;
-            height: calc(100vh - 85px);
+            top: var(--header-height);
+            height: calc(100vh - var(--header-height));
+            transition: background-color var(--transition-base), border-color var(--transition-base);
         }
 
         .sidebar-menu {
-            list-style: none;
-            padding: 0 20px;
+            padding: 0 var(--space-3);
         }
 
         .sidebar-item {
-            margin-bottom: 8px;
+            margin-bottom: 2px;
         }
 
         .sidebar-link {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            color: var(--text-gray);
-            text-decoration: none;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            color: var(--text-secondary);
             font-weight: 500;
-            border-radius: 12px;
-            transition: all 0.2s ease;
+            font-size: var(--font-small);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
         }
 
         .sidebar-link:hover,
         .sidebar-link.active {
-            background-color: rgba(224, 112, 46, 0.1);
-            color: var(--bg-orange);
+            background-color: var(--primary-light);
+            color: var(--primary);
         }
 
         .sidebar-link .material-symbols-outlined {
-            font-size: 22px;
+            font-size: 20px;
         }
 
         .sidebar-divider {
             height: 1px;
-            background-color: #E5E7EB;
-            margin: 20px 0;
+            background-color: var(--border-color);
+            margin: var(--space-5) 0;
         }
 
         .sidebar-title {
-            padding: 0 36px;
-            font-size: 12px;
+            padding: 0 var(--space-7);
+            font-size: var(--font-xs);
             font-weight: 700;
             text-transform: uppercase;
-            color: #9CA3AF;
-            margin-bottom: 15px;
             letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: var(--space-3);
         }
 
-        /* Main Content Area */
+        /* Main Content */
         .main-content {
             flex: 1;
-            padding: 40px;
+            padding: var(--space-10);
             overflow-y: auto;
         }
 
@@ -111,76 +107,89 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 35px;
+            margin-bottom: var(--space-8);
         }
 
         .dashboard-title {
-            font-size: 28px;
+            font-size: var(--font-h1);
             font-weight: 700;
-            color: var(--text-black);
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
         }
 
         .dashboard-subtitle {
-            color: var(--text-gray);
-            font-size: 15px;
-            margin-top: 5px;
+            color: var(--text-secondary);
+            font-size: var(--font-body);
+            margin-top: var(--space-1);
         }
 
         .new-chat-btn {
-            background-color: var(--bg-orange);
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-md);
             font-weight: 600;
-            font-size: 15px;
+            font-size: var(--font-small);
             display: flex;
             align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            box-shadow: 0 4px 12px rgba(224, 112, 46, 0.3);
+            gap: var(--space-2);
+            transition: all var(--transition-fast);
         }
 
         .new-chat-btn:hover {
-            background-color: #C15E22;
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .new-chat-btn .material-symbols-outlined {
+            font-size: 18px;
         }
 
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--space-5);
+            margin-bottom: var(--space-8);
         }
 
         .stat-card {
-            background-color: var(--text-white);
-            padding: 24px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-            border: 1px solid #F3F4F6;
+            background-color: var(--bg-secondary);
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
+            transition: all var(--transition-fast);
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-hover);
         }
 
         .stat-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
+            margin-bottom: var(--space-4);
         }
 
         .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--bg-orange);
-            background-color: rgba(224, 112, 46, 0.1);
+            color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .stat-icon .material-symbols-outlined {
+            font-size: 22px;
         }
 
         .stat-icon.green {
@@ -194,56 +203,58 @@
         }
 
         .stat-title {
-            color: var(--text-gray);
-            font-size: 14px;
+            color: var(--text-secondary);
+            font-size: var(--font-small);
             font-weight: 500;
         }
 
         .stat-value {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
-            color: var(--text-black);
+            color: var(--text-primary);
             margin-top: auto;
         }
 
         /* Recent Activity Section */
         .recent-section {
-            background-color: var(--text-white);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-            border: 1px solid #F3F4F6;
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: var(--space-7);
+            border: 1px solid var(--border-color);
         }
 
-        .section-header {
+        .section-header-dash {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: var(--space-6);
         }
 
-        .section-title {
-            font-size: 20px;
+        .section-title-dash {
+            font-size: var(--font-h3);
             font-weight: 600;
+            color: var(--text-primary);
         }
 
         .view-all {
-            color: var(--bg-orange);
-            text-decoration: none;
+            color: var(--primary);
             font-weight: 500;
-            font-size: 14px;
+            font-size: var(--font-small);
         }
 
-        .activity-list {
-            list-style: none;
+        .view-all:hover {
+            text-decoration: underline;
         }
+
+        .activity-list {}
 
         .activity-item {
             display: flex;
             align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #F3F4F6;
-            gap: 20px;
+            padding: var(--space-4) 0;
+            border-bottom: 1px solid var(--border-color);
+            gap: var(--space-4);
+            transition: background-color var(--transition-fast);
         }
 
         .activity-item:last-child {
@@ -254,55 +265,67 @@
         .activity-icon {
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            background-color: #F4F5F7;
+            border-radius: var(--radius-full);
+            background-color: var(--bg-tertiary);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-gray);
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .activity-icon .material-symbols-outlined {
+            font-size: 20px;
         }
 
         .activity-content {
             flex: 1;
+            min-width: 0;
         }
 
         .activity-title {
             font-weight: 600;
-            font-size: 15px;
-            color: var(--text-black);
-            margin-bottom: 4px;
+            font-size: var(--font-body);
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .activity-desc {
-            font-size: 13px;
-            color: var(--text-gray);
+            font-size: var(--font-small);
+            color: var(--text-secondary);
         }
 
         .activity-date {
-            font-size: 13px;
-            color: #9CA3AF;
+            font-size: var(--font-small);
+            color: var(--text-muted);
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .status-badge {
             padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-xs);
             font-weight: 600;
             background-color: rgba(16, 185, 129, 0.1);
             color: #10B981;
+            white-space: nowrap;
         }
 
+        /* Responsive */
         @media (max-width: 900px) {
             .sidebar {
                 position: fixed;
                 top: 0;
-                left: -320px;
+                left: -300px;
                 width: 280px !important;
                 height: 100vh;
                 z-index: 1000;
-                box-shadow: 4px 0 25px rgba(0, 0, 0, 0.15);
-                transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: var(--shadow-xl);
+                transition: left var(--transition-slow);
             }
 
             .sidebar.mobile-open {
@@ -312,15 +335,12 @@
             .sidebar-overlay {
                 display: none;
                 position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.4);
-                backdrop-filter: blur(3px);
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(4px);
                 z-index: 999;
                 opacity: 0;
-                transition: opacity 0.3s ease;
+                transition: opacity var(--transition-base);
             }
 
             .sidebar-overlay.active {
@@ -330,28 +350,22 @@
 
             .mobile-left-menu-btn {
                 display: flex !important;
-                background: none;
-                border: none;
-                color: var(--text-black);
-                padding: 5px;
-                cursor: pointer;
-                margin-right: 15px;
             }
         }
 
         @media (max-width: 768px) {
             .main-content {
-                padding: 20px;
+                padding: var(--space-5);
             }
 
             .dashboard-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 20px;
+                gap: var(--space-4);
             }
 
             .dashboard-title {
-                font-size: 24px;
+                font-size: var(--font-h2);
             }
 
             .stats-grid {
@@ -364,20 +378,14 @@
             }
 
             .activity-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .status-badge,
-            .activity-date {
-                align-self: flex-start;
+                flex-wrap: wrap;
+                gap: var(--space-3);
             }
         }
 
         @media (max-width: 480px) {
             .main-content {
-                padding: 15px;
+                padding: var(--space-4);
             }
 
             .dashboard-title {
@@ -395,13 +403,12 @@
     </script>
     <header class="header">
         <button class="mobile-left-menu-btn" id="mobile-left-menu-btn" style="display: none;">
-            <span class="material-symbols-outlined" style="font-size: 28px;">menu</span>
+            <span class="material-symbols-outlined" style="font-size: 24px;">menu</span>
         </button>
         <div class="logo-container" onclick="window.location.href='index.html'">
             <img src="logo.png" alt="Sphinx-SCA Logo" class="logo-icon">
             <div class="logo-text">
-                <span class="logo-sphinx">Sphinx</span><span class="logo-SCA">-SCA</span><span
-                    style="font-size: 14px; font-weight: 800; color: var(--bg-orange); margin-left: 6px; vertical-align: middle;">BETA</span>
+                <span class="logo-sphinx">Sphinx</span><span class="logo-sca">-SCA</span>
             </div>
         </div>
 
@@ -410,8 +417,8 @@
                 <span class="material-symbols-outlined theme-icon">dark_mode</span>
             </button>
             <a href="index.html" class="nav-link">Home</a>
-            <a href="about.html" class="nav-link">About Us</a>
-            <a href="login.html" class="nav-link" id="nav-login-btn">log in</a>
+            <a href="about.html" class="nav-link">About</a>
+            <a href="login.html" class="nav-link" id="nav-login-btn">Log in</a>
 
             <div class="profile-container" id="nav-profile-container">
                 <div class="nav-profile" id="nav-user-avatar" title="Your Account"></div>
@@ -459,10 +466,9 @@
                 </li>
                 <!-- Chat History Section -->
                 <li class="sidebar-item">
-                    <div class="sidebar-title" style="padding: 15px 36px 5px; margin:0;">Chat History</div>
+                    <div class="sidebar-title" style="padding: 15px 24px 5px; margin:0;">Chat History</div>
                     <ul class="sidebar-menu" id="chat-history-list"
                         style="max-height: 200px; overflow-y: auto; padding-right: 5px;">
-                        <!-- Chat history items will be injected here -->
                     </ul>
                 </li>
                 <li class="sidebar-item">
@@ -518,7 +524,7 @@
                 </div>
                 <button class="new-chat-btn" onclick="window.location.href='index.html'">
                     <span class="material-symbols-outlined">add</span>
-                    New Math Problem
+                    New Problem
                 </button>
             </div>
 
@@ -555,8 +561,8 @@
             </div>
 
             <div class="recent-section">
-                <div class="section-header">
-                    <h2 class="section-title">Recent Activity</h2>
+                <div class="section-header-dash">
+                    <h2 class="section-title-dash">Recent Activity</h2>
                     <a href="#" class="view-all">View All</a>
                 </div>
                 <ul class="activity-list" id="recent-activity-list">
@@ -586,8 +592,7 @@
                 <span class="material-symbols-outlined">lock</span>
             </div>
             <h2>Authentication Required</h2>
-            <p>Please log in or create an account to view and interact with your personal dashboard, solved problems,
-                and saved notes.</p>
+            <p>Please log in or create an account to view your personal dashboard, solved problems, and saved notes.</p>
             <div class="modal-actions">
                 <button class="modal-btn login-modal-btn" onclick="window.location.href='login.html'">Log In</button>
                 <button class="modal-btn signup-modal-btn" onclick="window.location.href='signup.html'">Sign Up</button>
@@ -639,39 +644,34 @@
 
             async function fetchUserData(userId) {
                 try {
-                    // Fetch all user messages
                     const { data: allMessages, error } = await supabase
                         .from('messages')
                         .select('*')
                         .eq('user_id', userId)
                         .eq('sender', 'user')
-                        .order('created_at', { ascending: true }); // Order ascending to get the FIRST message easily
+                        .order('created_at', { ascending: true });
 
                     if (error) throw error;
 
-                    // Group by session_id
                     const sessionsMap = new Map();
                     if (allMessages) {
                         allMessages.forEach(msg => {
                             const sid = msg.session_id || 'default';
                             if (!sessionsMap.has(sid)) {
-                                sessionsMap.set(sid, msg); // Store the first message of each session
+                                sessionsMap.set(sid, msg);
                             }
                         });
                     }
 
-                    // Convert map to array and sort by latest session first
-                    const uniqueSessions = Array.from(sessionsMap.values()).sort((a, b) => 
+                    const uniqueSessions = Array.from(sessionsMap.values()).sort((a, b) =>
                         new Date(b.created_at) - new Date(a.created_at)
                     );
 
-                    // 1. Update Problems Solved (Count of unique sessions)
                     const problemsSolvedStat = document.getElementById('problems-solved-stat');
                     if (problemsSolvedStat) {
                         problemsSolvedStat.textContent = uniqueSessions.length;
                     }
 
-                    // 2. Update Recent Activity & Chat History
                     const recentActivityList = document.getElementById('recent-activity-list');
                     const chatHistoryList = document.getElementById('chat-history-list');
 
@@ -684,7 +684,6 @@
                             const dateStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                             const timeStr = dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
-                            // Add to Recent Activity (limit to top 5)
                             if (index < 5 && recentActivityList) {
                                 const li = document.createElement('li');
                                 li.className = 'activity-item';
@@ -693,8 +692,7 @@
                                         <span class="material-symbols-outlined">functions</span>
                                     </div>
                                     <div class="activity-content">
-                                        <div class="activity-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">
-                                        </div>
+                                        <div class="activity-title"></div>
                                         <div class="activity-desc">Math Problem</div>
                                     </div>
                                     <div class="status-badge">Solved</div>
@@ -704,7 +702,6 @@
                                 recentActivityList.appendChild(li);
                             }
 
-                            // Add to Chat History sidebar (limit to top 15 session titles)
                             if (index < 15 && chatHistoryList) {
                                 const liHistory = document.createElement('li');
                                 liHistory.className = 'sidebar-item';
@@ -723,7 +720,7 @@
                             recentActivityList.innerHTML = '<li class="activity-item"><div class="activity-content"><div class="activity-desc">No recent activity found. Start a chat!</div></div></li>';
                         }
                         if (chatHistoryList) {
-                            chatHistoryList.innerHTML = '<li class="sidebar-item"><span style="padding: 12px 16px; font-size: 13px; color: var(--text-gray); display: block;">No chats yet</span></li>';
+                            chatHistoryList.innerHTML = '<li class="sidebar-item"><span style="padding: 12px 16px; font-size: 13px; color: var(--text-muted); display: block;">No chats yet</span></li>';
                         }
                     }
                 } catch (err) {
@@ -754,7 +751,6 @@
             const themeToggleBtn = document.getElementById('theme-toggle-btn');
             const themeIcon = themeToggleBtn ? themeToggleBtn.querySelector('.theme-icon') : null;
 
-            // Update UI based on current theme
             function updateThemeUI() {
                 if (!themeIcon) return;
                 const isDark = document.body.classList.contains('dark-theme');
@@ -782,11 +778,10 @@
                 });
             }
 
-            // Coming Soon Modal Logic for unused dashboard links
+            // Coming Soon Modal Logic
             const comingSoonModal = document.getElementById('coming-soon-modal');
             const closeComingSoonBtn = document.getElementById('close-coming-soon');
 
-            // Select all anchor tags with href="#" that aren't the logout button or active sidebar links
             const unusedLinks = document.querySelectorAll('a[href="#"]:not(#logout-btn):not(.sidebar-link.active)');
 
             function showComingSoon(e) {
@@ -807,6 +802,7 @@
             }
         });
     </script>
+
 </body>
 
 </html>
