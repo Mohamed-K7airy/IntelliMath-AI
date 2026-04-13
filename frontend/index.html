@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sphinx-SCA </title>
+    <meta name="description"
+        content="Sphinx-SCA is a premium AI-powered math solver and assistant. Get instant solutions, step-by-step explanations, and smart tutoring.">
+    <link rel="icon" type="image/png" href="/logo.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Theme Initialization (Before render) -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark-theme');
+            }
+        })();
+    </script>
+
+    <!-- Material Icons -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <link rel="stylesheet" href="/styles/style.css">
+    <link rel="stylesheet" href="/styles/enhancements.css">
+    <link rel="stylesheet" href="/styles/study-mode.css">
+
+    <!-- Renderers: Marked, KaTeX, Highlight.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark-dimmed.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
+
+    <!-- GeoGebra Graphing Applet (Lazy Loaded) -->
+</head>
+
+<body class="app-page">
+    <script>
+        if (document.documentElement.classList.contains('dark-theme')) {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+    <div class="app-layout">
+        <!-- Main Sidebar -->
+        <aside class="main-sidebar collapsed" id="main-sidebar">
+            <div class="sidebar-top">
+                <button class="menu-toggle-btn" id="sidebar-toggle-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </div>
+
+            <div class="sidebar-action">
+                <button class="new-chat-sidebar-btn" onclick="window.location.reload();">
+                    <span class="material-symbols-outlined">add</span>
+                    <span class="btn-text">New chat</span>
+                </button>
+            </div>
+
+            <div class="sidebar-scrollable">
+                <div class="sidebar-section hover-expand">
+                    <div class="section-header">
+                        <span class="material-symbols-outlined section-icon">history</span>
+                        <span class="section-title">Recent</span>
+                    </div>
+                    <ul class="sidebar-history-list" id="sidebar-history-list">
+                        <!-- History items populated via JS -->
+                    </ul>
+                </div>
+            </div>
+
+            <div class="sidebar-bottom">
+                <a href="index.html" class="sidebar-nav-item active">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="item-text">Home</span>
+                </a>
+                <a href="dashboard.html" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="item-text">Dashboard</span>
+                </a>
+                <a href="V2.0.html" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">info</span>
+                    <span class="item-text">Upcoming Features</span>
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="item-text">Settings</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile sidebar -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Main Content Area -->
+        <div class="main-content-wrapper">
+            <header class="header">
+                <button class="mobile-left-menu-btn" id="mobile-left-menu-btn" style="display: none;">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">menu</span>
+                </button>
+                <div class="logo-container">
+                    <img src="/logo.png" alt="Sphinx-SCA Logo" class="logo-icon">
+                    <div class="logo-text">
+                        <span class="logo-sphinx">Sphinx</span><span class="logo-sca">-SCA</span>
+                    </div>
+                </div>
+
+                <nav class="nav">
+                    <button class="nav-theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                        <span class="material-symbols-outlined theme-icon">dark_mode</span>
+                    </button>
+                    <a href="study-mode.html" class="study-mode-header-btn" id="study-mode-btn">
+                        Study Mode
+                    </a>
+                    <a href="login.html" class="nav-link" id="nav-login-btn">Log in</a>
+
+                    <div class="profile-container" id="nav-profile-container">
+                        <div class="nav-profile" id="nav-user-avatar" title="Your Account"></div>
+                        <div class="profile-dropdown">
+                            <a href="dashboard.html" class="dropdown-item">
+                                <span class="material-symbols-outlined">person</span>
+                                Profile
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <span class="material-symbols-outlined">settings</span>
+                                Settings
+                            </a>
+                            <a href="#" class="dropdown-item logout" id="logout-btn">
+                                <span class="material-symbols-outlined">logout</span>
+                                Log Out
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+            </header>
+
+            <!-- Landing Hero (Gemini-style, left-aligned) -->
+            <main class="hero">
+                <div class="hero-content">
+                    <div class="hero-brand-section">
+                        <div class="hero-logo-circle">
+                            <img src="/logo.png" alt="Sphinx-GPT Logo" class="hero-logo-img">
+                        </div>
+                        <h1 class="hero-title">Your Personal Math Solver</h1>
+                        <p class="hero-subtitle">Get instant homework help from your on-demand AI math solver</p>
+                    </div>
+
+                    <div class="gpt-tabs">
+                        <button class="gpt-tab active" data-mode="general">General</button>
+                        <button class="gpt-tab" data-mode="think">Deep Think</button>
+                        <button class="gpt-tab" data-mode="steps">Steps</button>
+                    </div>
+
+                    <!-- Input Box — MathGPT-style unified container -->
+                    <div class="hero-search-wrapper">
+                        <div class="unified-input-card">
+                            <!-- Drag & Drop Zone (top section) -->
+                            <div class="drop-zone" id="drop-zone">
+                                <div class="upload-content">
+                                    <span class="material-symbols-outlined drop-zone-icon">image</span>
+                                    <span class="drop-zone-text">Drag & drop or <span class="click-link">click</span> to
+                                        add images or PDF</span>
+                                </div>
+                                <input type="file" id="drop-zone-input" accept="image/*,.pdf" style="display:none">
+                            </div>
+
+                            <div class="input-content">
+                                <div class="image-preview-wrapper" id="image-preview-wrapper">
+                                    <img src="" alt="Preview" class="image-preview-thumbnail"
+                                        id="image-preview-thumbnail">
+                                    <div class="upload-overlay" id="upload-overlay" aria-live="polite">
+                                        <span class="mini-spinner" aria-hidden="true"></span>
+                                        <span id="upload-overlay-text">Uploading…</span>
+                                    </div>
+                                    <div class="upload-progress" id="upload-progress" aria-hidden="true">
+                                        <div id="upload-progress-bar"></div>
+                                    </div>
+                                    <button class="remove-preview-btn" id="remove-preview-btn">×</button>
+                                </div>
+                                <input type="file" id="image-upload-input" accept="image/*,.pdf" style="display:none">
+
+                                <!-- Input field -->
+                                <textarea class="search-input" id="main-search-input"
+                                    placeholder="Type your question here…" rows="1"></textarea>
+
+                                <!-- Footer: math | mode + send -->
+                                <div class="search-footer">
+                                    <div class="search-tools">
+                                        <button class="tool-pill-btn" id="math-keyboard-toggle" title="Symbols">
+                                            <span class="material-symbols-outlined dropdown-icon"
+                                                style="font-size: 18px;">functions</span>
+                                            <span>Symbols</span>
+                                        </button>
+                                        <button class="tool-pill-btn" id="hero-tool-create-graph"
+                                            onclick="toggleGraphBar()" title="Creat Graph">
+                                            <span class="material-symbols-outlined dropdown-icon"
+                                                style="font-size: 18px;">grid_view</span>
+                                            <span>Creat Graph</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="search-actions">
+                                        <!-- Mode Dropdown restored here -->
+                                        <div class="mode-dropdown" id="mode-dropdown">
+                                            <button class="mode-dropdown-btn" id="mode-dropdown-btn">
+                                                <span
+                                                    class="material-symbols-outlined dropdown-icon">auto_awesome</span>
+                                                <span class="dropdown-text">General</span>
+                                                <span class="material-symbols-outlined"
+                                                    style="font-size: 14px;">expand_more</span>
+                                            </button>
+                                            <div class="mode-dropdown-menu" id="mode-dropdown-menu">
+                                                <div class="mode-option active" data-mode="general">
+                                                    <span class="material-symbols-outlined">auto_awesome</span>
+                                                    <span>General</span>
+                                                </div>
+                                                <div class="mode-option" data-mode="think">
+                                                    <span class="material-symbols-outlined">psychology</span>
+                                                    <span>Deep Think</span>
+                                                </div>
+                                                <div class="mode-option" data-mode="steps">
+                                                    <span class="material-symbols-outlined">format_list_numbered</span>
+                                                    <span>Steps</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button class="send-btn" id="main-send-btn" title="Send">
+                                            <span class="material-symbols-outlined send-icon">arrow_upward</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="hero-disclaimer">Sphinx-GPT can make mistakes. Always verify important calculations.</p>
+
+                </div>
+            </main>
+
+            <!-- Chat Interface (Hidden by default) -->
+            <main class="chat-interface" id="chat-interface" style="display: none;">
+                <div class="chat-messages-wrapper" id="chat-messages-wrapper">
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Messages will be appended here -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- Global Math Keyboard / Symbol Toolbar (placed before floating wrapper for better flow) -->
+            <div class="math-toolbar" id="math-toolbar">
+                <div class="math-toolbar-header">
+                    <div class="math-toolbar-tabs">
+                        <button class="math-tab active" data-tab="popular">Popular</button>
+                        <button class="math-tab" data-tab="trig">sin cos</button>
+                        <button class="math-tab" data-tab="calculus">Calculus</button>
+                        <button class="math-tab" data-tab="comparison">≥ ≠</button>
+                        <button class="math-tab" data-tab="sets">∈ ⊂</button>
+                        <button class="math-tab" data-tab="arrows">→</button>
+                        <button class="math-tab" data-tab="greek">Ωα</button>
+                    </div>
+                    <button class="math-toolbar-close" id="math-toolbar-close" title="Close Toolbar">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="math-symbols-grid" id="math-symbols-grid">
+                    <button class="math-sym-btn" data-insert="/" title="Fraction">⁄</button>
+                    <button class="math-sym-btn" data-insert="x^" title="Superscript">x□</button>
+                    <button class="math-sym-btn" data-insert="x_" title="Subscript">x₍₎</button>
+                    <button class="math-sym-btn" data-insert="√(" title="Square root">√□</button>
+                    <button class="math-sym-btn" data-insert="∛(" title="Cube root">∛□</button>
+                    <button class="math-sym-btn" data-insert="log(" title="Logarithm">log₍₎</button>
+                    <button class="math-sym-btn" data-insert="∫" title="Integral">∫</button>
+                    <button class="math-sym-btn" data-insert="Σ" title="Summation">Σ</button>
+                    <button class="math-sym-btn" data-insert="π" title="Pi">π</button>
+                    <button class="math-sym-btn" data-insert="∞" title="Infinity">∞</button>
+                    <button class="math-sym-btn" data-insert="+" title="Plus">+</button>
+                    <button class="math-sym-btn" data-insert="−" title="Minus">−</button>
+                    <button class="math-sym-btn" data-insert="×" title="Multiply">×</button>
+                    <button class="math-sym-btn" data-insert="÷" title="Divide">÷</button>
+                    <button class="math-sym-btn" data-insert="!" title="Factorial">!</button>
+                    <button class="math-sym-btn" data-insert="log(" title="Log">log</button>
+                    <button class="math-sym-btn" data-insert="ln(" title="Natural log">ln</button>
+                    <button class="math-sym-btn" data-insert="x^2" title="Squared">x²</button>
+                    <button class="math-sym-btn" data-insert="x^(-1)" title="Inverse">x⁻¹</button>
+                    <button class="math-sym-btn" data-insert="(n choose k)" title="Binomial">C(n,k)</button>
+                    <button class="math-sym-btn" data-insert="∂" title="Partial">∂</button>
+                    <button class="math-sym-btn" data-insert="e^" title="Exponential">eˣ</button>
+                    <button class="math-sym-btn" data-insert="e^(iπ)" title="Euler">eⁱ</button>
+                    <button class="math-sym-btn" data-insert="±" title="Plus-minus">±</button>
+                </div>
+            </div>
+
+            <!-- Floating Input Bar (shown only in chat mode) -->
+            <div class="floating-search-wrapper" id="floating-search-wrapper" style="display: none;">
+                <div class="unified-input-card">
+                    <div class="drop-zone" id="chat-drop-zone">
+                        <div class="upload-content">
+                            <span class="material-symbols-outlined drop-zone-icon">add_photo_alternate</span>
+                            <span class="drop-zone-text">Drag & drop or <span class="click-link">click</span> to add
+                                images or PDF</span>
+                        </div>
+                        <input type="file" id="chat-drop-zone-input" accept="image/*,.pdf" style="display:none">
+                    </div>
+                    <div class="input-content">
+                        <div class="image-preview-wrapper" id="chat-image-preview-wrapper" style="display:none">
+                            <img src="" alt="Preview" class="image-preview-thumbnail" id="chat-image-preview-thumbnail">
+                            <div class="upload-overlay" id="chat-upload-overlay" aria-live="polite">
+                                <span class="mini-spinner"></span>
+                                <span id="chat-upload-overlay-text">Uploading…</span>
+                            </div>
+                            <div class="upload-progress" id="chat-upload-progress" aria-hidden="true">
+                                <div id="chat-upload-progress-bar"></div>
+                            </div>
+                            <button class="remove-preview-btn" id="chat-remove-preview-btn">×</button>
+                        </div>
+                        <textarea class="search-input" id="chat-search-input" placeholder="Ask Sphinx-SCA…"
+                            rows="1"></textarea>
+                        <div class="search-footer">
+                            <div class="search-tools">
+                                <button class="tool-pill-btn" id="chat-math-keyboard-toggle" title="Symbols">
+                                    <span class="material-symbols-outlined dropdown-icon"
+                                        style="font-size: 18px;">functions</span>
+                                    <span>Symbols</span>
+                                </button>
+                                <button class="tool-pill-btn" id="tool-create-graph" onclick="toggleGraphBar()"
+                                    title="Tools">
+                                    <span class="material-symbols-outlined dropdown-icon"
+                                        style="font-size: 18px;">grid_view</span>
+                                    <span>Create Graph</span>
+                                </button>
+                            </div>
+                            <div class="search-actions">
+                                <div class="mode-dropdown">
+                                    <button class="mode-dropdown-btn" id="chat-mode-btn">
+                                        <span class="material-symbols-outlined dropdown-icon">auto_awesome</span>
+                                        <span class="dropdown-text">General</span>
+                                        <span class="material-symbols-outlined"
+                                            style="font-size: 14px;">expand_more</span>
+                                    </button>
+                                    <div class="mode-dropdown-menu" id="chat-mode-dropdown-menu">
+                                        <div class="mode-option active" data-mode="general">
+                                            <span class="material-symbols-outlined">auto_awesome</span>
+                                            <span>General</span>
+                                        </div>
+                                        <div class="mode-option" data-mode="think">
+                                            <span class="material-symbols-outlined">psychology</span>
+                                            <span>Deep Think</span>
+                                        </div>
+                                        <div class="mode-option" data-mode="steps">
+                                            <span class="material-symbols-outlined">format_list_numbered</span>
+                                            <span>Steps</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="send-btn" id="chat-send-btn" title="Send">
+                                    <span class="material-symbols-outlined send-icon">arrow_upward</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-disclaimer">Sphinx-SCA can make mistakes. Always verify important calculations.</div>
+            </div>
+
+            <!-- Media Zoom Modal -->
+            <div class="media-modal" id="media-modal" role="dialog" aria-modal="true" aria-label="Media preview">
+                <div class="media-modal-content" role="document">
+                    <button class="media-modal-close" id="media-modal-close" title="Close">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                    <img id="media-modal-img" alt="Preview">
+                </div>
+            </div>
+
+
+            <div class="calculator-panel" id="calculatorPanel">
+                <div class="calc-header">
+                    <button class="calc-tab active" id="calcTabBasic">⊞ Basic Calculator</button>
+                    <button class="calc-close" id="calcCloseBtn">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div id="basicCalc" class="calc-body">
+                    <div class="calc-display" id="calcDisplay">0</div>
+                    <div class="calc-grid">
+                        <button class="calc-btn func" data-calc="AC">AC</button>
+                        <button class="calc-btn func" data-calc="⌫">⌫</button>
+                        <button class="calc-btn func" data-calc="^">^</button>
+                        <button class="calc-btn op" data-calc="/">÷</button>
+                        <button class="calc-btn" data-calc="7">7</button>
+                        <button class="calc-btn" data-calc="8">8</button>
+                        <button class="calc-btn" data-calc="9">9</button>
+                        <button class="calc-btn op" data-calc="*">×</button>
+                        <button class="calc-btn" data-calc="4">4</button>
+                        <button class="calc-btn" data-calc="5">5</button>
+                        <button class="calc-btn" data-calc="6">6</button>
+                        <button class="calc-btn op" data-calc="-">−</button>
+                        <button class="calc-btn" data-calc="1">1</button>
+                        <button class="calc-btn" data-calc="2">2</button>
+                        <button class="calc-btn" data-calc="3">3</button>
+                        <button class="calc-btn op" data-calc="+">+</button>
+                        <button class="calc-btn" data-calc="(-)">(-)</button>
+                        <button class="calc-btn" data-calc="0">0</button>
+                        <button class="calc-btn" data-calc=".">.</button>
+                        <button class="calc-btn equals" data-calc="=">=</button>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Graph Input Bar (direct plot) -->
+            <div id="graph-input-bar" class="graph-input-bar">
+                <span class="material-symbols-outlined drag-handle">drag_indicator</span>
+                <span class="material-symbols-outlined graph-bar-icon">show_chart</span>
+                <input id="fn-input" type="text" placeholder="e.g. sin(x), x^2 + 3x - 2" class="graph-bar-input">
+                <button onclick="plotFnToChat()" class="graph-bar-plot-btn">Plot</button>
+                <button onclick="document.getElementById('graph-input-bar').style.display='none'"
+                    class="graph-bar-close-btn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Coming Soon Modal -->
+            <div class="coming-soon-modal-overlay" id="coming-soon-modal">
+                <div class="coming-soon-modal-content">
+                    <div class="coming-soon-icon">
+                        <span class="material-symbols-outlined">construction</span>
+                    </div>
+                    <h2 class="coming-soon-title">Coming Soon!</h2>
+                    <p class="coming-soon-text">We are working hard to bring this feature to you. Voice input and image
+                        uploads will be available in the next major update.</p>
+                    <button class="coming-soon-btn" id="close-coming-soon">Got It</button>
+                </div>
+            </div>
+        </div> <!-- End main-content-wrapper -->
+    </div> <!-- End app-layout -->
+
+    <!-- Frontend App (modular) -->
+    <script type="module" src="/app.js"></script>
+
+</body>
+
+</html>

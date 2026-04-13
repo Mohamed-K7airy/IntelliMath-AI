@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Mode — Sphinx-SCA</title>
+    <meta name="description"
+        content="Sphinx-SCA Study Mode — Focus timer, notes, and productivity tools to supercharge your study sessions.">
+    <link rel="icon" type="image/png" href="/logo.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Theme Initialization -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark-theme');
+            }
+        })();
+    </script>
+
+    <!-- Material Icons -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- Renderers -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark-dimmed.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
+
+    <link rel="stylesheet" href="/styles/style.css">
+    <link rel="stylesheet" href="/styles/enhancements.css">
+    <link rel="stylesheet" href="/styles/study-mode.css">
+</head>
+
+<body class="app-page">
+    <script>
+        if (document.documentElement.classList.contains('dark-theme')) {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+
+    <div class="app-layout">
+        <!-- Main Sidebar (History) -->
+        <aside class="main-sidebar collapsed" id="main-sidebar">
+            <div class="sidebar-top">
+                <button class="menu-toggle-btn" id="sidebar-toggle-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </div>
+            <div class="sidebar-action">
+                <button class="new-chat-sidebar-btn" onclick="window.location.reload();">
+                    <span class="material-symbols-outlined">add</span>
+                    <span class="btn-text">New chat</span>
+                </button>
+            </div>
+            <div class="sidebar-scrollable">
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <span class="material-symbols-outlined section-icon">history</span>
+                        <span class="section-title">Recent</span>
+                    </div>
+                    <ul class="sidebar-history-list" id="sidebar-history-list"></ul>
+                </div>
+            </div>
+            <div class="sidebar-bottom">
+                <a href="index.html" class="sidebar-nav-item">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="item-text">Home</span>
+                </a>
+                <a href="study-mode.html" class="sidebar-nav-item active">
+                    <span class="material-symbols-outlined">school</span>
+                    <span class="item-text">Study Mode</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile sidebar -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Triple Pane Container -->
+        <div class="study-page-layout">
+
+            <!-- MAIN AREA — Chat -->
+            <main class="study-chat-main" id="study-main">
+                <header class="scm-header">
+                    <div class="logo-container" onclick="window.location.href='index.html'">
+                        <img src="/logo.png" alt="Sphinx-SCA" class="logo-icon">
+                        <div class="logo-text">
+                            <span class="logo-sphinx">Sphinx</span><span class="logo-sca">-SCA</span>
+                        </div>
+                    </div>
+                    <div class="scm-header-right">
+                        <button class="nav-theme-toggle" id="theme-toggle-btn" title="Toggle Theme">
+                            <span class="material-symbols-outlined theme-icon">dark_mode</span>
+                        </button>
+                        <a href="index.html" class="scm-back-btn">
+                            <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>
+                            <span>Back to Chat</span>
+                        </a>
+                    </div>
+                </header>
+
+                <!-- Study Hero Section -->
+                <div class="scm-hero" id="study-hero">
+                    <div class="hero-brand-section">
+                        <div class="hero-logo-circle">
+                            <img src="/logo.png" alt="Sphinx-SCA Logo" class="hero-logo-img">
+                        </div>
+                        <h1 class="hero-title">Study Assistant</h1>
+                        <p class="hero-subtitle">What do you want to study today?</p>
+                    </div>
+
+                    <!-- Topic Suggestion Cards -->
+                    <div class="hero-topic-suggestions" id="hero-topic-suggestions">
+                        <button class="topic-card" data-topic="algebra"
+                            data-prompt="Give me an algebra problem to practice">
+                            <svg class="topic-icon lucide lucide-sigma" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path d="M18 7V4H6l6 8-6 8h12v-3" />
+                            </svg>
+                            <span class="topic-label">Algebra</span>
+                            <span class="topic-desc">Equations, factoring</span>
+                        </button>
+                        <button class="topic-card" data-topic="calculus"
+                            data-prompt="Give me a calculus problem to practice">
+                            <svg class="topic-icon lucide lucide-trending-up" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                                <polyline points="16 7 22 7 22 13" />
+                            </svg>
+                            <span class="topic-label">Calculus</span>
+                            <span class="topic-desc">Derivatives, integrals</span>
+                        </button>
+                        <button class="topic-card" data-topic="trigonometry"
+                            data-prompt="Give me a trigonometry problem to practice">
+                            <svg class="topic-icon lucide lucide-waves" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path
+                                    d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.6 2 5 2 2.3 0 2.3-2 5-2 1.3 0 1.9.5 2.5 1" />
+                                <path
+                                    d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.6 2 5 2 2.3 0 2.3-2 5-2 1.3 0 1.9.5 2.5 1" />
+                                <path
+                                    d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.6 2 5 2 2.3 0 2.3-2 5-2 1.3 0 1.9.5 2.5 1" />
+                            </svg>
+                            <span class="topic-label">Trigonometry</span>
+                            <span class="topic-desc">Identities, equations</span>
+                        </button>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="hero-quick-actions" id="hero-quick-actions">
+                        <button class="quick-action-pill" data-action="problem">
+                            <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+                            Send me a problem
+                        </button>
+                        <button class="quick-action-pill" data-action="explain">
+                            <span class="material-symbols-outlined" style="font-size:16px;">school</span>
+                            Explain a concept
+                        </button>
+                    </div>
+
+                    <div class="hero-search-wrapper">
+                        <div class="unified-input-card">
+                            <div class="drop-zone" id="hero-drop-zone">
+                                <div class="upload-content">
+                                    <span class="material-symbols-outlined drop-zone-icon">image</span>
+                                    <span class="drop-zone-text">Drag & drop or <span class="click-link">click</span> to
+                                        add images or PDF</span>
+                                </div>
+                                <input type="file" id="hero-drop-zone-input" accept="image/*,.pdf" style="display:none">
+                            </div>
+
+                            <div class="input-content">
+                                <div class="image-preview-wrapper" id="hero-image-preview-wrapper" style="display:none">
+                                    <img src="" alt="Preview" class="image-preview-thumbnail"
+                                        id="hero-image-preview-thumbnail">
+                                    <div class="upload-overlay" aria-live="polite">
+                                        <span class="mini-spinner"></span>
+                                        <span>Uploading…</span>
+                                    </div>
+                                    <button class="remove-preview-btn" id="hero-remove-preview-btn">×</button>
+                                </div>
+                                <textarea class="search-input" id="hero-search-input"
+                                    placeholder="Type your question here…" rows="1"></textarea>
+
+                                <div class="search-footer">
+                                    <div class="search-tools">
+                                        <button class="tool-pill-btn" id="hero-math-keyboard-toggle" title="Symbols">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size:18px;">functions</span>
+                                            <span>Symbols</span>
+                                        </button>
+                                        <button class="tool-pill-btn" id="hero-tool-create-graph" title="Tools">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size:18px;">grid_view</span>
+                                            <span>Creat Graph</span>
+                                        </button>
+                                    </div>
+                                    <div class="search-actions">
+                                        <div class="mode-dropdown" id="hero-mode-dropdown">
+                                            <button class="mode-dropdown-btn" id="hero-mode-dropdown-btn">
+                                                <span
+                                                    class="material-symbols-outlined dropdown-icon">auto_awesome</span>
+                                                <span class="dropdown-text">General</span>
+                                                <span class="material-symbols-outlined"
+                                                    style="font-size: 14px;">expand_more</span>
+                                            </button>
+                                            <div class="mode-dropdown-menu" id="hero-mode-dropdown-menu">
+                                                <div class="mode-option active" data-mode="general">
+                                                    <span class="material-symbols-outlined">auto_awesome</span>
+                                                    <span>General</span>
+                                                </div>
+                                                <div class="mode-option" data-mode="think">
+                                                    <span class="material-symbols-outlined">psychology</span>
+                                                    <span>Deep Think</span>
+                                                </div>
+                                                <div class="mode-option" data-mode="steps">
+                                                    <span class="material-symbols-outlined">format_list_numbered</span>
+                                                    <span>Steps</span>
+                                                </div>
+                                                <div class="mode-option" data-mode="study">
+                                                    <span class="material-symbols-outlined">school</span>
+                                                    <span>Study Agent</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="send-btn" id="hero-send-btn">
+                                            <span class="material-symbols-outlined send-icon">arrow_upward</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="hero-disclaimer">Sphinx-SCA can make mistakes. Always verify important calculations.</p>
+                </div>
+
+                <!-- Chat Active Area -->
+                <div class="scm-chat-active" id="study-chat-active" style="display: none;">
+                    <div class="scm-chat-area" id="study-chat-messages-wrapper">
+                        <div class="scm-chat-messages" id="chat-messages"></div>
+                    </div>
+
+                    <div class="floating-search-wrapper" id="floating-search-wrapper">
+                        <div class="unified-input-card">
+                            <div class="drop-zone" id="chat-drop-zone">
+                                <div class="upload-content">
+                                    <span class="material-symbols-outlined drop-zone-icon">image</span>
+                                    <span class="drop-zone-text">Drag & drop or <span class="click-link">click</span> to
+                                        add images or PDF</span>
+                                </div>
+                                <input type="file" id="chat-drop-zone-input" accept="image/*,.pdf" style="display:none">
+                            </div>
+                            <div class="input-content">
+                                <div class="image-preview-wrapper" id="chat-image-preview-wrapper" style="display:none">
+                                    <img src="" alt="Preview" class="image-preview-thumbnail"
+                                        id="chat-image-preview-thumbnail">
+                                    <div class="upload-overlay" aria-live="polite">
+                                        <span class="mini-spinner"></span>
+                                        <span>Uploading…</span>
+                                    </div>
+                                    <button class="remove-preview-btn" id="chat-remove-preview-btn">×</button>
+                                </div>
+                                <textarea class="search-input" id="chat-search-input" placeholder="Ask Sphinx-SCA…"
+                                    rows="1"></textarea>
+                                <div class="search-footer">
+                                    <div class="search-tools">
+                                        <button class="tool-pill-btn" id="chat-math-keyboard-toggle" title="Symbols">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size:18px;">functions</span>
+                                            <span>Symbols</span>
+                                        </button>
+                                        <button class="tool-pill-btn" id="chat-tool-create-graph" title="Tools">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size:18px;">grid_view</span>
+                                            <span>Tools</span>
+                                        </button>
+                                    </div>
+                                    <div class="search-actions">
+                                        <div class="mode-dropdown" id="chat-mode-dropdown">
+                                            <button class="mode-dropdown-btn" id="chat-mode-btn">
+                                                <span
+                                                    class="material-symbols-outlined dropdown-icon">auto_awesome</span>
+                                                <span class="dropdown-text">General</span>
+                                                <span class="material-symbols-outlined"
+                                                    style="font-size:14px;">expand_more</span>
+                                            </button>
+                                            <div class="mode-dropdown-menu" id="chat-mode-dropdown-menu">
+                                                <div class="mode-option active" data-mode="general">
+                                                    <span class="material-symbols-outlined">auto_awesome</span>
+                                                    <span>General</span>
+                                                </div>
+                                                <div class="mode-option" data-mode="think">
+                                                    <span class="material-symbols-outlined">psychology</span>
+                                                    <span>Deep Think</span>
+                                                </div>
+                                                <div class="mode-option" data-mode="steps">
+                                                    <span class="material-symbols-outlined">format_list_numbered</span>
+                                                    <span>Steps</span>
+                                                </div>
+                                                <div class="mode-option" data-mode="study">
+                                                    <span class="material-symbols-outlined">school</span>
+                                                    <span>Study Agent</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="send-btn" id="chat-send-btn">
+                                            <span class="material-symbols-outlined send-icon">arrow_upward</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-disclaimer">Sphinx-SCA can make mistakes. Always verify important calculations.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shared Symbols Toolbar -->
+                <div class="math-toolbar" id="math-toolbar">
+                    <div class="math-toolbar-header">
+                        <div class="math-toolbar-tabs">
+                            <button class="math-tab active" data-tab="popular">Popular</button>
+                            <button class="math-tab" data-tab="trig">sin cos</button>
+                            <button class="math-tab" data-tab="calculus">Calculus</button>
+                            <button class="math-tab" data-tab="comparison">≥ ≠</button>
+                            <button class="math-tab" data-tab="sets">∈ ⊂</button>
+                            <button class="math-tab" data-tab="arrows">→</button>
+                            <button class="math-tab" data-tab="greek">Ωα</button>
+                        </div>
+                        <button class="math-toolbar-close" id="math-toolbar-close" title="Close Toolbar">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="math-symbols-grid" id="math-symbols-grid"></div>
+                </div>
+
+            </main>
+
+            <!-- RIGHT SIDEBAR — Study Tools -->
+            <aside class="study-right-sidebar" id="study-right-sidebar">
+                <div class="srs-section srs-timer" id="timer-card">
+                    <div class="srs-section-header" style="justify-content: flex-start; gap: 12px;">
+                        <button class="srs-close-btn" id="close-right-panel" title="Hide Sidebar">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined srs-icon">timer</span>
+                            <h3>Focus Timer</h3>
+                        </div>
+                    </div>
+                    <div class="timer-plans">
+                        <button class="timer-plan-btn active" data-work="25" data-break="5">
+                            <span class="plan-label">Pomodoro</span>
+                        </button>
+                        <button class="timer-plan-btn" data-work="45" data-break="15">
+                            <span class="plan-label">Deep Focus</span>
+                        </button>
+                        <button class="timer-plan-btn" data-work="0" data-break="0">
+                            <span class="plan-label">Free</span>
+                        </button>
+                    </div>
+                    <div class="srs-timer-body">
+                        <div class="timer-ring">
+                            <svg viewBox="0 0 220 220">
+                                <circle class="timer-ring-bg" cx="110" cy="110" r="100" />
+                                <circle class="timer-ring-progress" id="timer-ring-progress" cx="110" cy="110"
+                                    r="100" />
+                            </svg>
+                            <div class="timer-center">
+                                <span class="timer-time" id="timer-time">25:00</span>
+                                <span class="timer-label" id="timer-label">Focus</span>
+                            </div>
+                        </div>
+                        <div class="timer-controls">
+                            <button class="timer-ctrl-btn" id="timer-reset-btn"><span
+                                    class="material-symbols-outlined">restart_alt</span></button>
+                            <button class="timer-ctrl-btn timer-play-btn" id="timer-play-btn"><span
+                                    class="material-symbols-outlined" id="play-icon">play_arrow</span></button>
+                            <button class="timer-ctrl-btn" id="timer-skip-btn"><span
+                                    class="material-symbols-outlined">skip_next</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="srs-section srs-notes" id="notes-card">
+                    <div class="srs-section-header">
+                        <span class="material-symbols-outlined srs-icon">edit_note</span>
+                        <h3>Quick Notes</h3>
+                        <button class="srs-action-btn" id="clear-notes-btn"><span
+                                class="material-symbols-outlined">delete_sweep</span></button>
+                    </div>
+                    <div class="notes-input-row">
+                        <input type="text" class="note-input" id="note-input" placeholder="Add a note...">
+                        <button class="note-add-btn" id="note-add-btn"><span
+                                class="material-symbols-outlined">add</span></button>
+                    </div>
+                    <ul class="notes-list" id="notes-list"></ul>
+                </div>
+
+                <div class="srs-section srs-tasks" id="tasks-card">
+                    <div class="srs-section-header">
+                        <span class="material-symbols-outlined srs-icon">checklist</span>
+                        <h3>Tasks</h3>
+                        <button class="srs-action-btn" id="clear-tasks-btn"><span
+                                class="material-symbols-outlined">playlist_remove</span></button>
+                    </div>
+                    <div class="tasks-input-row">
+                        <input type="text" class="task-input" id="task-input" placeholder="Add a task...">
+                        <button class="task-add-btn" id="task-add-btn"><span
+                                class="material-symbols-outlined">add</span></button>
+                    </div>
+                    <ul class="tasks-list" id="tasks-list"></ul>
+                </div>
+            </aside>
+
+            <!-- Floating Open Button (outside of sidebar to stay visible) -->
+            <button class="srs-open-tab" id="open-right-panel" title="Show Study Tools">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modals & Floaters -->
+    <!-- Global Math Keyboard / Symbol Toolbar -->
+    <div class="math-toolbar" id="math-toolbar">
+        <div class="math-toolbar-header">
+            <div class="math-toolbar-tabs">
+                <button class="math-tab active" data-tab="popular">Popular</button>
+                <button class="math-tab" data-tab="trig">sin cos</button>
+                <button class="math-tab" data-tab="calculus">Calculus</button>
+                <button class="math-tab" data-tab="comparison">≥ ≠</button>
+                <button class="math-tab" data-tab="sets">∈ ⊂</button>
+                <button class="math-tab" data-tab="arrows">→</button>
+                <button class="math-tab" data-tab="greek">Ωα</button>
+            </div>
+            <button class="math-toolbar-close" id="math-toolbar-close" title="Close Toolbar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="math-symbols-grid" id="math-symbols-grid">
+            <!-- Symbols populated via JS -->
+        </div>
+    </div>
+
+    <div class="calculator-panel" id="calculatorPanel">
+        <div class="calc-header">
+            <button class="calc-tab active">Basic Calculator</button>
+            <button class="calc-close" id="calcCloseBtn"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="calc-body">
+            <div class="calc-display" id="calcDisplay">0</div>
+            <div class="calc-grid"></div>
+        </div>
+    </div>
+
+    <div id="graph-input-bar" class="graph-input-bar">
+        <span class="material-symbols-outlined drag-handle">drag_indicator</span>
+        <input id="fn-input" type="text" placeholder="y = sin(x)" class="graph-bar-input">
+        <button id="graph-bar-plot-btn" class="graph-bar-plot-btn">Plot</button>
+        <button id="graph-bar-close-btn" class="graph-bar-close-btn"><span
+                class="material-symbols-outlined">close</span></button>
+    </div>
+
+    <script src="/study-mode.js" type="module"></script>
+</body>
+
+</html>

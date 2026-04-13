@@ -17,26 +17,33 @@ Requirements:
 import sys
 import json
 import re
-from groq import Groq
+import asyncio
 import os
+import threading
+from groq import Groq, AsyncGroq
+from dotenv import load_dotenv
+
+# ✅ Memory: import MemoryManager
+try:
+    from .memory_manager import MemoryManager
+except ImportError:
+    from memory_manager import MemoryManager
 
 
 # ─────────────────────────────────────────────
 #  CONFIG
 # ─────────────────────────────────────────────
 
-from dotenv import load_dotenv
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_MODEL   = "openai/gpt-oss-120b"
 
-# We initialize the client only if the API KEY is present.
-# This prevents a crash during module import on platforms like Railway
-# if the environment variable is not yet set.
-client = None
+client       = None
+async_client = None
 if GROQ_API_KEY:
     try:
-        client = Groq(api_key=GROQ_API_KEY, timeout=60.0)
+        client       = Groq(api_key=GROQ_API_KEY, timeout=60.0)
+        async_client = AsyncGroq(api_key=GROQ_API_KEY, timeout=60.0)
     except Exception as e:
         print(f"⚠️ Failed to initialize Groq client: {e}")
 else:
@@ -67,7 +74,36 @@ When chatting normally:
 Always respond in the same language the user uses (Arabic or English).
 If the user writes in Arabic, respond in Arabic.
 If the user writes in English, respond in English.
+
+IMPORTANT: You will often receive a [System Context About User] section. NEVER output, quote, or repeat this context verbatim to the user. Use it silently in your mind to personalize your response, but never acknowledge its existence or list its contents.
 """
+
+
+# ─────────────────────────────────────────────
+#  SAFE BACKGROUND TASK HELPER
+# ─────────────────────────────────────────────
+
+def _safe_background_task(coro):
+    """
+    ✅ FIX (W-01): Safely schedule an async coroutine in the background.
+    Uses asyncio.create_task if a loop is running, otherwise falls back
+    to a daemon thread.
+    """
+    try:
+        loop = asyncio.get_running_loop()
+        loop.create_task(coro)
+    except RuntimeError:
+        # No running event loop — use a background thread
+        def _run():
+            _loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(_loop)
+            try:
+                _loop.run_until_complete(coro)
+            except Exception as e:
+                print(f"⚠️ Background task error: {e}")
+            finally:
+                _loop.close()
+        threading.Thread(target=_run, daemon=True).start()
 
 
 # ─────────────────────────────────────────────
@@ -110,27 +146,28 @@ def _call_chat(messages: list, temperature: float = 0.7) -> str:
     except Exception as e:
         raise RuntimeError(f"Groq API error: {e}")
 
-def stream_chat(messages: list, temperature: float = 0.7):
-    """Stream conversation history from Groq."""
-    if client is None:
-        raise RuntimeError("Groq client not initialized.")
-    
+
+async def _stream_chat_async(messages: list, temperature: float = 0.7):
+    """Stream conversation history from Groq (async generator)."""
+    if async_client is None:
+        raise RuntimeError("Groq async client not initialized.")
+
     try:
         full_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + messages
-        stream = client.chat.completions.create(
+        stream = await async_client.chat.completions.create(
             model=GROQ_MODEL,
             messages=full_messages,
             temperature=temperature,
             max_tokens=4096,
             stream=True,
         )
-        
+
         in_thinking = False
-        for chunk in stream:
+        async for chunk in stream:
             if not chunk.choices:
                 continue
-            delta = chunk.choices[0].delta
-            content = getattr(delta, 'content', None)
+            delta   = chunk.choices[0].delta
+            content = getattr(delta, "content", None)
             if content:
                 if "<think>" in content:
                     in_thinking = True
@@ -138,10 +175,9 @@ def stream_chat(messages: list, temperature: float = 0.7):
                 if "</think>" in content:
                     in_thinking = False
                     continue
-                
                 if not in_thinking:
                     yield content
-                    
+
     except Exception as e:
         yield f"Error: {str(e)}"
 
@@ -476,34 +512,68 @@ Return ONLY the expression:
 
 
 # ─────────────────────────────────────────────
-#  ROLE 6 — CHAT (NEW)
+#  ROLE 6 — CHAT (with Memory)
 # ─────────────────────────────────────────────
 
-def chat(message: str, history: list = None) -> str:
+async def chat(
+    message: str,
+    history: list = None,
+    user_id: str = None,
+    memory_manager: "MemoryManager" = None,
+) -> str:
     """
-    Role 6 — Natural conversation.
+    Role 6 — Natural conversation with memory integration.
 
     Args:
-        message : current user message
-        history : [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
+        message        : current user message
+        history        : [{"role": "user", "content": "..."}, ...]
+        user_id        : optional — enables memory load/save
+        memory_manager : MemoryManager instance
 
     Returns:
         AI response string
     """
     if history is None:
         history = []
+
+    # ✅ Memory: load relevant context for this user
+    memory_context = ""
+    if memory_manager and user_id:
+        memory_context = await memory_manager.get_context(user_id, message)
+
     messages = history + [{"role": "user", "content": message}]
-    return _call_chat(messages, temperature=0.7)
+
+    if memory_context:
+        # Inject memory context directly into the final user message to avoid system role leakage
+        messages[-1]["content"] = f"[System Context About User: {memory_context}]\n\n{message}"
+
+    response = _call_chat(messages, temperature=0.7)
+
+    # ✅ Memory: save this interaction in the background
+    if memory_manager and user_id:
+        _safe_background_task(
+            memory_manager.learn(user_id, messages + [{"role": "assistant", "content": response}])
+        )
+
+    return response
 
 
-def chat_with_math(message: str, math_result: dict, history: list = None) -> str:
+async def chat_with_math(
+    message: str,
+    math_result: dict,
+    history: list = None,
+    user_id: str = None,
+    memory_manager: "MemoryManager" = None,
+) -> str:
     """
-    Role 6b — Wrap a math solution in a natural friendly response.
+    Role 6b — Wrap a math solution in a natural friendly response with memory.
 
     Args:
-        message     : original user question
-        math_result : result dict from SymPy solver
-        history     : conversation history
+        message        : original user question
+        math_result    : result dict from SymPy solver
+        history        : conversation history
+        user_id        : optional — enables memory
+        memory_manager : MemoryManager instance
 
     Returns:
         Natural language response with math solution embedded
@@ -523,15 +593,32 @@ def chat_with_math(message: str, math_result: dict, history: list = None) -> str
             for i, s in enumerate(steps)
         )
 
+    # ✅ Memory: load context
+    memory_context = ""
+    if memory_manager and user_id:
+        memory_context = await memory_manager.get_context(user_id, message)
+
     steps_text_block = f"Steps found:\n{steps_text}" if steps_text else ""
-    context = f"""The user asked: "{message}"
+    context = f"""{memory_context}
+The user asked: "{message}"
 The math solver found the answer: {answer}
 {steps_text_block}
 
 Now respond as Sphinx-SCA naturally. Present the answer warmly with the steps. Encourage the user."""
 
     messages = history + [{"role": "user", "content": context}]
-    return _call_chat(messages, temperature=0.5)
+    response = _call_chat(messages, temperature=0.5)
+
+    # ✅ Memory: save this interaction in the background
+    if memory_manager and user_id:
+        _safe_background_task(
+            memory_manager.learn(
+                user_id,
+                [{"role": "user", "content": message}, {"role": "assistant", "content": response}]
+            )
+        )
+
+    return response
 
 
 # ─────────────────────────────────────────────
@@ -548,6 +635,10 @@ class LLMManager:
         classification = bert_classifier.predict(question)
         # Must return: {"branch": "...", "problem_type": "...", "confidence": ..., "is_math": true/false}
     """
+
+    def __init__(self):
+        # ✅ Memory: initialize MemoryManager once per LLMManager instance
+        self.memory = MemoryManager()
 
     def classify(self, raw_text: str) -> dict:
         return classify_problem(raw_text)
@@ -567,17 +658,51 @@ class LLMManager:
     def ocr_fix(self, latex_text: str) -> str:
         return validate_ocr(latex_text)
 
-    def chat(self, message: str, history: list = None) -> str:
+    async def chat(self, message: str, history: list = None, user_id: str = None) -> str:
         """Chat normally — greetings, questions, small talk."""
-        return chat(message, history)
+        return await chat(message, history, user_id, self.memory)
 
-    def chat_with_math(self, message: str, math_result: dict, history: list = None) -> str:
+    async def chat_with_math(
+        self,
+        message: str,
+        math_result: dict,
+        history: list = None,
+        user_id: str = None,
+    ) -> str:
         """Wrap math solution in natural friendly response."""
-        return chat_with_math(message, math_result, history)
+        return await chat_with_math(message, math_result, history, user_id, self.memory)
 
-    def stream_chat(self, messages: list, temperature: float = 0.7):
-        """Stream conversation history from Groq."""
-        return stream_chat(messages, temperature)
+    async def stream_chat(self, messages: list, temperature: float = 0.7, user_id: str = None):
+        """
+        Stream conversation history from Groq with memory integration.
+        Async generator — yields chunks.
+        """
+        # ✅ Memory: inject context before streaming
+        if user_id and messages:
+            last_msg = messages[-1]["content"] if messages[-1]["role"] == "user" else ""
+            if last_msg:
+                try:
+                    memory_context = await asyncio.wait_for(self.memory.get_context(user_id, last_msg), timeout=10.0)
+                    if memory_context:
+                        messages[-1]["content"] = f"[System Context About User: {memory_context}]\n\n{last_msg}"
+                except asyncio.TimeoutError:
+                    print("⚠️ Memory fetch timed out during stream (HF cold), skipping context.")
+                except Exception as e:
+                    print(f"⚠️ Memory fetch error: {e}")
+
+        full_content = ""
+        async for chunk in _stream_chat_async(messages, temperature):
+            full_content += chunk
+            yield chunk
+
+        # ✅ Memory: save full conversation after stream finishes
+        if user_id and full_content:
+            _safe_background_task(
+                self.memory.learn(
+                    user_id,
+                    messages + [{"role": "assistant", "content": full_content}]
+                )
+            )
 
 
 # ─────────────────────────────────────────────
@@ -597,11 +722,11 @@ if __name__ == "__main__":
 
     print("\n" + "=" * 55)
     print("TEST 6a — Chat (English greeting)")
-    print(llm.chat("hi! what can you do?"))
+    print(asyncio.run(llm.chat("hi! what can you do?")))
 
     print("\n" + "=" * 55)
     print("TEST 6b — Chat (Arabic)")
-    print(llm.chat("مرحبا، كيف حالك؟"))
+    print(asyncio.run(llm.chat("مرحبا، كيف حالك؟")))
 
     print("\n" + "=" * 55)
     print("TEST 6c — Chat with math result")
@@ -613,7 +738,7 @@ if __name__ == "__main__":
             {"step": 3, "title": "Answer",          "action": "x = 3",       "explanation": "Final answer"}
         ]
     }
-    print(llm.chat_with_math("solve 2x + 5 = 11", fake_result))
+    print(asyncio.run(llm.chat_with_math("solve 2x + 5 = 11", fake_result)))
 
     print("\n" + "=" * 55)
     print("TEST 6d — Multi-turn conversation")
@@ -621,4 +746,4 @@ if __name__ == "__main__":
         {"role": "user",      "content": "hi!"},
         {"role": "assistant", "content": "Hello! I'm Sphinx-SCA. How can I help you?"}
     ]
-    print(llm.chat("can you solve quadratic equations?", history))
+    print(asyncio.run(llm.chat("can you solve quadratic equations?", history)))

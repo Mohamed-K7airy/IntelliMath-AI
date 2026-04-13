@@ -9,22 +9,27 @@ Tasks:
 import os
 import uuid
 import httpx
-from datetime import datetime
+from datetime import datetime, timezone
 
 # ─────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
 BUCKET_NAME = "ocr-images"
 TABLE_NAME  = "ocr_results"
 
-HEADERS = {
-    "apikey": SUPABASE_KEY,
-    "Authorization": f"Bearer {SUPABASE_KEY}",
-}
+
+# ✅ FIX (C-06): Read env vars at call time, not at import time
+def _get_supabase_url() -> str:
+    return os.getenv("SUPABASE_URL", "")
+
+
+def _get_headers() -> dict:
+    key = os.getenv("SUPABASE_KEY", "")
+    return {
+        "apikey": key,
+        "Authorization": f"Bearer {key}",
+    }
 
 # ─────────────────────────────────────────────
 # 1. UPLOAD IMAGE TO STORAGE
@@ -39,10 +44,11 @@ async def upload_image(image_bytes: bytes, filename: str, content_type: str = "i
     ext = filename.rsplit(".", 1)[-1] if "." in filename else "jpg"
     unique_name = f"{uuid.uuid4().hex}.{ext}"
     
-    upload_url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET_NAME}/{unique_name}"
-    
+    supabase_url = _get_supabase_url()
+    upload_url = f"{supabase_url}/storage/v1/object/{BUCKET_NAME}/{unique_name}"
+
     upload_headers = {
-        **HEADERS,
+        **_get_headers(),
         "Content-Type": content_type,
     }
     
@@ -57,7 +63,7 @@ async def upload_image(image_bytes: bytes, filename: str, content_type: str = "i
         raise Exception(f"Upload failed: {response.status_code} — {response.text}")
     
     # Build public URL
-    public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{unique_name}"
+    public_url = f"{supabase_url}/storage/v1/object/public/{BUCKET_NAME}/{unique_name}"
     return public_url
 
 
@@ -84,10 +90,10 @@ async def save_ocr_result(
         sympy_expr  text
         created_at  timestamp default now()
     """
-    insert_url = f"{SUPABASE_URL}/rest/v1/{TABLE_NAME}"
-    
+    insert_url = f"{_get_supabase_url()}/rest/v1/{TABLE_NAME}"
+
     insert_headers = {
-        **HEADERS,
+        **_get_headers(),
         "Content-Type": "application/json",
         "Prefer": "return=representation",
     }
@@ -97,7 +103,7 @@ async def save_ocr_result(
         "raw_text":   raw_text,
         "latex":      latex,
         "sympy_expr": sympy_expr,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),  # ✅ FIX (S-11): timezone-aware
     }
     
     if user_id:

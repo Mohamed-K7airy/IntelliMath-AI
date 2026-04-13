@@ -1,0 +1,421 @@
+/* ============================================================
+   FRONTEND ENHANCEMENTS — Markdown, Code, Chat UX
+   ============================================================ */
+
+/* ─── Fix: AI message text rendering ───────────────────────── */
+/* Override pre-wrap that conflicts with markdown HTML output   */
+.ai-message .text-body {
+    white-space: normal;
+}
+
+/* Keep pre-wrap for user messages (plain text, no markdown)    */
+.user-message .text-body {
+    white-space: pre-wrap;
+}
+
+/* ─── Markdown Prose Styles (AI messages only) ─────────────── */
+.ai-message .text-body p {
+    margin: 0 0 0.85em;
+    line-height: 1.75;
+}
+
+.ai-message .text-body p:last-child {
+    margin-bottom: 0;
+}
+
+.ai-message .text-body ul,
+.ai-message .text-body ol {
+    margin: 0.5em 0 0.85em;
+    padding-left: 1.6em;
+}
+
+.ai-message .text-body ul {
+    list-style: disc;
+}
+
+.ai-message .text-body ol {
+    list-style: decimal;
+}
+
+.ai-message .text-body li {
+    margin: 0.3em 0;
+    line-height: 1.65;
+    list-style: revert;
+}
+
+.ai-message .text-body li > p {
+    margin-bottom: 0.4em;
+}
+
+.ai-message .text-body h1,
+.ai-message .text-body h2,
+.ai-message .text-body h3,
+.ai-message .text-body h4 {
+    margin: 1.2em 0 0.5em;
+    font-weight: 650;
+    color: var(--text-primary);
+    line-height: 1.35;
+}
+
+.ai-message .text-body h1 { font-size: 1.4em; }
+.ai-message .text-body h2 { font-size: 1.25em; }
+.ai-message .text-body h3 { font-size: 1.1em; }
+.ai-message .text-body h4 { font-size: 1.05em; }
+
+.ai-message .text-body h1:first-child,
+.ai-message .text-body h2:first-child,
+.ai-message .text-body h3:first-child {
+    margin-top: 0;
+}
+
+.ai-message .text-body blockquote {
+    border-left: 3px solid var(--primary);
+    padding: 0.5em 1em;
+    margin: 0.6em 0;
+    color: var(--text-secondary);
+    background: var(--surface-hover);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.ai-message .text-body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.75em 0;
+    font-size: 0.92em;
+    overflow-x: auto;
+    display: block;
+}
+
+.ai-message .text-body th,
+.ai-message .text-body td {
+    border: 1px solid var(--border-color);
+    padding: 0.5em 0.75em;
+    text-align: left;
+}
+
+.ai-message .text-body th {
+    background: var(--bg-tertiary);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ai-message .text-body tr:hover td {
+    background: var(--surface-hover);
+}
+
+.ai-message .text-body hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 1.2em 0;
+}
+
+.ai-message .text-body a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.ai-message .text-body a:hover {
+    color: var(--primary-hover);
+}
+
+.ai-message .text-body strong {
+    font-weight: 650;
+    color: var(--text-primary);
+}
+
+.ai-message .text-body em {
+    font-style: italic;
+}
+
+.ai-message .text-body del {
+    text-decoration: line-through;
+    opacity: 0.65;
+}
+
+/* ─── Inline code ──────────────────────────────────────────── */
+.ai-message .text-body code:not([class*="language-"]) {
+    background: var(--bg-tertiary);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', monospace;
+    font-size: 0.88em;
+    color: var(--primary);
+    border: 1px solid var(--border-color);
+}
+
+/* ─── Code Block Wrapper (with copy button) ────────────────── */
+.code-block-wrapper {
+    margin: 0.85em 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #1e1e2e;
+}
+
+.dark-theme .code-block-wrapper {
+    background: #1a1a2e;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+:root:not(.dark-theme) .code-block-wrapper {
+    background: #1e1e2e;
+}
+
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.code-lang {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: lowercase;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.3px;
+}
+
+.code-copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.code-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.code-copy-btn.copied {
+    color: #4ade80;
+}
+
+.code-block-wrapper pre {
+    margin: 0 !important;
+    padding: 16px !important;
+    overflow-x: auto;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.code-block-wrapper code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #d4d4d4;
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* ─── KaTeX Display Math ───────────────────────────────────── */
+.ai-message .text-body .katex-display {
+    margin: 0.8em 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.5em 0;
+}
+
+.ai-message .text-body .katex {
+    font-size: 1.1em;
+}
+
+/* ─── Agent Thinking Animation ──────────────────────────────── */
+.agent-status-pill.is-active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.agent-status-pill.is-active .agent-status-text {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+@keyframes thinkingDots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+}
+
+.agent-status-pill.is-active .agent-status-text::after {
+    content: '';
+    animation: thinkingDots 1.5s steps(1) infinite;
+}
+
+/* ─── Edit Mode ────────────────────────────────────────────── */
+.user-edit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 640px;
+}
+
+.user-edit-box {
+    width: 100%;
+    min-height: 44px;
+    max-height: 200px;
+    resize: vertical;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 10px 14px;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.55;
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.user-edit-box:focus {
+    border-color: var(--primary);
+}
+
+.user-edit-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.edit-save-btn,
+.edit-cancel-btn {
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+}
+
+.edit-save-btn {
+    background: var(--primary);
+    color: #fff;
+}
+
+.edit-save-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.edit-cancel-btn {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.edit-cancel-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+/* ─── Error Message — Retry Button ──────────────────────────── */
+.error-retry-btn {
+    margin-top: 8px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.error-retry-btn:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+/* ─── Better Skeleton Pulse ─────────────────────────────────── */
+.stream-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 8px 0 4px;
+}
+
+.stream-skeleton .skeleton-line {
+    height: 14px;
+    width: 100%;
+    max-width: 520px;
+    border-radius: 7px;
+}
+
+.stream-skeleton .skeleton-line.w-70 { width: 70%; }
+.stream-skeleton .skeleton-line.w-45 { width: 45%; }
+
+/* ─── Typing Cursor (streaming) ──────────────────────────────── */
+.typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    margin-left: 2px;
+    background: var(--primary);
+    animation: cursorBlink 1s steps(2, start) infinite;
+    vertical-align: text-bottom;
+    border-radius: 1px;
+}
+
+/* ─── Image fade-in animation ────────────────────────────────── */
+.message-image {
+    animation: imgFadeIn 0.4s ease both;
+}
+
+@keyframes imgFadeIn {
+    from {
+        opacity: 0;
+        filter: blur(8px);
+        transform: scale(0.97);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(1);
+    }
+}
+
+/* ─── Mobile fixes for enhancements ──────────────────────────── */
+@media (max-width: 768px) {
+    .code-block-wrapper pre {
+        padding: 12px !important;
+    }
+
+    .code-block-wrapper code {
+        font-size: 12px;
+    }
+
+    .code-block-header {
+        padding: 6px 12px;
+    }
+
+    .user-edit-box {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .ai-message .text-body table {
+        font-size: 0.85em;
+    }
+}
